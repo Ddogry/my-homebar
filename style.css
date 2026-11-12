@@ -1,0 +1,38 @@
+
+/* =========================
+   1. 기본 설정
+========================= */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background-color: #F5F2EA;
+  color: #263C32;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* =========================
+   2. 컬러 설정
+========================= */
+
+:root {
+  --green: #1E3932;
+  --dark-green: #142B25;
+  --cream: #F5F2EA;
+  --white: #FFFFFF;
+  --sage: #A3B18A;
+  --gray: #777D74;
+}
