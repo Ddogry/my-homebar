@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Homebar - 칵테일 & 위스키 레시피</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="header">
+        <h1>🍸 My Homebar</h1>
+        <p>나만의 홈바 레시피 아카이브</p>
+        
+        <!-- 검색창 -->
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="칵테일 이름이나 재료를 검색해보세요 (예: Whisky, 모히또)">
+        </div>
+
+        <!-- 카테고리 필터 버튼 -->
+        <div class="category-filters">
+            <button class="filter-btn active" data-category="All">전체</button>
+            <button class="filter-btn" data-category="Whisky">위스키</button>
+            <button class="filter-btn" data-category="Gin">진</button>
+            <button class="filter-btn" data-category="Rum">럼</button>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <!-- 사이드바: 내 보유 재료 (술장) 체크리스트 -->
+        <aside class="sidebar">
+            <h3>🧊 내 보유 재료 (술장)</h3>
+            <p class="sidebar-desc">가진 재료를 체크하면 만들 수 있는 칵테일만 필터링됩니다!</p>
+            <div id="ingredientCheckboxes" class="checkbox-group">
+                <!-- JS로 동적 생성됨 -->
+            </div>
+            <button id="resetFilterBtn" class="reset-btn">필터 초기화</button>
+        </aside>
+
+        <!-- 레시피 카드 목록 영역 -->
+        <section class="content">
+            <div id="recipeContainer" class="recipe-grid">
+                <!-- JavaScript를 통해 동적 렌더링 -->
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
