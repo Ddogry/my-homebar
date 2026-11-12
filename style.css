@@ -1,7 +1,17 @@
 
 /* =========================
-   1. 기본 설정
+   1. RESET & VARIABLES
 ========================= */
+
+:root {
+  --bg: #11110f;
+  --surface: #1b1b18;
+  --surface-light: #25251f;
+  --text: #f4f0e8;
+  --muted: #99958a;
+  --accent: #c49a55;
+  --border: rgba(255, 255, 255, 0.1);
+}
 
 * {
   margin: 0;
@@ -14,99 +24,88 @@ html {
 }
 
 body {
-  font-family: 'Noto Sans KR', sans-serif;
-  background-color: #F5F2EA;
-  color: #263C32;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', 'Noto Sans KR', sans-serif;
+  line-height: 1.6;
 }
 
 a {
-  text-decoration: none;
   color: inherit;
+  text-decoration: none;
+}
+
+button,
+input {
+  font: inherit;
 }
 
 /* =========================
-   2. 컬러 설정
-========================= */
-
-:root {
-  --green: #1E3932;
-  --dark-green: #142B25;
-  --cream: #F5F2EA;
-  --white: #FFFFFF;
-  --sage: #A3B18A;
-  --gray: #777D74;
-}
-
-/* =========================
-   3. Header 디자인
+   2. HEADER
 ========================= */
 
 .header {
   width: 100%;
-  height: 85px;
+  min-height: 82px;
   padding: 0 8%;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: var(--cream);
-  border-bottom: 1px solid #e5e1d7;
+  border-bottom: 1px solid var(--border);
+  background: #11110f;
 }
 
 .logo {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 25px;
+  font-size: 21px;
   font-weight: 700;
-  letter-spacing: 2px;
-  color: var(--green);
+  letter-spacing: 1.5px;
+}
+
+.logo span {
+  color: var(--accent);
 }
 
 .navigation {
   display: flex;
-  align-items: center;
   gap: 38px;
 }
 
 .navigation a {
+  color: var(--muted);
   font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  color: var(--green);
-  transition: color 0.3s;
+  letter-spacing: 1.2px;
+  transition: color 0.2s;
 }
 
 .navigation a:hover {
-  color: #8a9c70;
+  color: var(--accent);
 }
 
-.login-button {
-  padding: 12px 22px;
-  border: 1px solid var(--green);
-  border-radius: 30px;
-  color: var(--green);
+.header-button {
+  padding: 11px 20px;
+  border: 1px solid var(--accent);
+  color: var(--accent);
   font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  transition: all 0.3s;
+  letter-spacing: 1px;
+  transition: 0.2s;
 }
 
-.login-button:hover {
-  background-color: var(--green);
-  color: white;
+.header-button:hover {
+  background: var(--accent);
+  color: #11110f;
 }
 
 /* =========================
-   4. Hero 디자인
+   3. HERO
 ========================= */
 
 .hero {
-  min-height: 570px;
-  padding: 80px 10%;
+  min-height: 590px;
+  padding: 90px 10%;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 50px;
-  background-color: var(--green);
-  color: var(--cream);
 }
 
 .hero-content {
@@ -114,76 +113,365 @@ a {
 }
 
 .eyebrow {
-  margin-bottom: 24px;
-  color: #c3cfad;
-  font-family: 'DM Sans', sans-serif;
+  color: var(--accent);
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 2px;
+  margin-bottom: 20px;
 }
 
 .hero h1 {
-  font-family: 'DM Sans', sans-serif;
-  font-size: clamp(42px, 5vw, 68px);
-  font-weight: 600;
-  line-height: 1.2;
+  font-size: clamp(48px, 6vw, 76px);
+  line-height: 1.1;
   letter-spacing: -2px;
+  margin-bottom: 25px;
 }
 
 .hero h1 span {
-  color: #c5d2a9;
+  color: var(--accent);
 }
 
 .hero-description {
-  margin-top: 25px;
-  color: #e0e5d9;
+  color: var(--muted);
   font-size: 15px;
-  font-weight: 300;
   line-height: 2;
+  margin-bottom: 32px;
 }
 
 .main-button {
   display: inline-block;
-  margin-top: 32px;
-  padding: 16px 27px;
-  border-radius: 30px;
-  background-color: var(--cream);
-  color: var(--green);
-  font-family: 'DM Sans', sans-serif;
+  padding: 15px 25px;
+  background: var(--accent);
+  color: #17140f;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 1px;
-  transition: all 0.3s;
+  transition: 0.2s;
 }
 
 .main-button:hover {
-  background-color: var(--sage);
-  transform: translateY(-3px);
+  background: #dfb875;
+  transform: translateY(-2px);
 }
-
-/* 메인 이미지 영역 */
 
 .hero-image {
   flex: 1;
-  max-width: 480px;
-  height: 370px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  background:
-    linear-gradient(135deg, #64745b, #293e32);
+  max-width: 470px;
+  height: 340px;
 }
 
 .image-placeholder {
-  width: 85%;
-  height: 85%;
+  width: 100%;
+  height: 100%;
+  background:
+    linear-gradient(135deg, rgba(196,154,85,0.16), rgba(0,0,0,0.4)),
+    #29251e;
+  border: 1px solid rgba(196,154,85,0.3);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}
+
+.image-placeholder span {
+  color: var(--accent);
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 3px;
+}
+
+.image-placeholder p {
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 2px;
+}
+
+/* =========================
+   4. RECIPE SECTION
+========================= */
+
+.recipes-section {
+  padding: 90px 8%;
+  background: #171714;
+}
+
+.section-heading {
+  margin-bottom: 35px;
+}
+
+.section-heading h2 {
+  font-size: 36px;
+  letter-spacing: -1px;
+}
+
+.search-area {
+  margin-bottom: 35px;
+}
+
+.search-area input {
+  width: 100%;
+  max-width: 600px;
+  padding: 17px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  outline: none;
+}
+
+.search-area input:focus {
+  border-color: var(--accent);
+}
+
+.search-area input::placeholder {
+  color: #77736b;
+}
+
+.filter-title {
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  margin-bottom: 15px;
+}
+
+.category-area {
+  margin-bottom: 40px;
+}
+
+.category-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.filter-btn {
+  padding: 10px 22px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.filter-btn:hover,
+.filter-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #17140f;
+}
+
+/* =========================
+   5. RECIPE LAYOUT
+========================= */
+
+.recipe-layout {
+  display: grid;
+  grid-template-columns: 230px 1fr;
+  gap: 45px;
+}
+
+.ingredient-sidebar {
+  padding: 25px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  height: fit-content;
+}
+
+.sidebar-heading {
+  margin-bottom: 25px;
+}
+
+.sidebar-heading h3 {
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+
+.sidebar-heading p:last-child {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+#ingredientCheckboxes {
+  margin-bottom: 20px;
+}
+
+#ingredientCheckboxes label {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+  padding: 8px 0;
+}
+
+#resetFilterBtn {
+  width: 100%;
+  padding: 11px;
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-size: 10px;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+
+#resetFilterBtn:hover {
+  background: var(--accent);
+  color: #17140f;
+}
+
+.recipe-result-heading {
   display: flex;
   align-items: center;
-  justify-content: center;
-  border: 1px solid #ffffff55;
-  color: #f5f2ea;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 11px;
-  letter-spacing: 3px;
+  justify-content: space-between;
+  margin-bottom: 25px;
+}
+
+.recipe-result-heading h3 {
+  font-size: 22px;
+}
+
+.recipe-result-heading span {
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+
+.recipe-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+
+/* Recipe card - JavaScript 연결용 */
+
+.recipe-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  transition: transform 0.25s, border-color 0.25s;
+}
+
+.recipe-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--accent);
+}
+
+/* =========================
+   6. BOTTOM BANNER
+========================= */
+
+.journal {
+  padding: 100px 20px;
+  text-align: center;
+  background: #211e18;
+}
+
+.journal h2 {
+  font-size: 44px;
+  line-height: 1.2;
+  margin-bottom: 20px;
+}
+
+.journal > p:not(.eyebrow) {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 2;
+  margin-bottom: 30px;
+}
+
+/* =========================
+   7. FOOTER
+========================= */
+
+.footer {
+  padding: 40px 8%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--border);
+}
+
+.footer p {
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+
+/* =========================
+   8. RESPONSIVE
+========================= */
+
+@media (max-width: 900px) {
+  .header {
+    padding: 20px 5%;
+  }
+
+  .navigation {
+    gap: 15px;
+  }
+
+  .hero {
+    padding: 70px 7%;
+  }
+
+  .recipe-layout {
+    grid-template-columns: 190px 1fr;
+    gap: 25px;
+  }
+}
+
+@media (max-width: 650px) {
+  .header {
+    flex-wrap: wrap;
+    gap: 18px;
+  }
+
+  .navigation {
+    order: 3;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .header-button {
+    padding: 9px 12px;
+  }
+
+  .hero {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 65px 7%;
+  }
+
+  .hero-image {
+    width: 100%;
+    max-width: none;
+    height: 240px;
+  }
+
+  .recipes-section {
+    padding: 65px 6%;
+  }
+
+  .recipe-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .recipe-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .recipe-result-heading span {
+    display: none;
+  }
+
+  .journal h2 {
+    font-size: 34px;
+  }
+
+  .footer {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
 }
