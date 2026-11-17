@@ -1,8 +1,145 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  feature/ui-design
+  <title>MY HOMEBAR | Recipe Archive</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+  <header class="header">
+    <a href="#home" class="logo">MY HOMEBAR<span>.</span></a>
+
+    <nav class="navigation">
+      <a href="#home">HOME</a>
+      <a href="#recipes">RECIPES</a>
+      <a href="#ingredients">MY CABINET</a>
+    </nav>
+
+    <a href="#recipes" class="header-button">EXPLORE RECIPES</a>
+  </header>
+
+  <main>
+
+    <section class="hero" id="home">
+      <div class="hero-content">
+        <p class="eyebrow">YOUR PERSONAL RECIPE ARCHIVE</p>
+
+        <h1>
+          Discover Your<br>
+          <span>Homebar.</span>
+        </h1>
+
+        <p class="hero-description">
+          다양한 레시피를 한곳에서 확인하고<br>
+          나만의 홈바 컬렉션을 정리해 보세요.
+        </p>
+
+        <a href="#recipes" class="main-button">EXPLORE RECIPES →</a>
+      </div>
+
+      <div class="hero-image">
+        <div class="image-placeholder">
+          <span>MY HOMEBAR</span>
+          <p>EXPLORE YOUR COLLECTION</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="recipes-section" id="recipes">
+
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">FIND YOUR NEXT RECIPE</p>
+          <h2>Recipe Collection</h2>
+        </div>
+      </div>
+
+      <div class="search-area">
+        <input
+          type="search"
+          id="searchInput"
+          placeholder="Search recipes..."
+          aria-label="레시피 검색"
+        >
+      </div>
+
+      <div class="category-area" id="category">
+        <p class="filter-title">CATEGORY</p>
+
+        <div class="category-list">
+          <button type="button" class="filter-btn active" data-category="all">ALL</button>
+          <button type="button" class="filter-btn" data-category="Whisky">WHISKY</button>
+          <button type="button" class="filter-btn" data-category="Gin">GIN</button>
+          <button type="button" class="filter-btn" data-category="Rum">RUM</button>
+          <button type="button" class="filter-btn" data-category="Vodka">VODKA</button>
+          <button type="button" class="filter-btn" data-category="Liqueur">LIQUEUR</button>
+        </div>
+      </div>
+
+      <div class="recipe-layout">
+
+        <aside class="ingredient-sidebar" id="ingredients">
+          <div class="sidebar-heading">
+            <p class="eyebrow">MY COLLECTION</p>
+            <h3>My Cabinet</h3>
+            <p>보유한 재료를 선택해 보세요.</p>
+          </div>
+
+          <div id="ingredientCheckboxes">
+            <!-- JavaScript ingredient checkboxes -->
+          </div>
+
+          <button type="button" id="resetFilterBtn">RESET FILTER</button>
+        </aside>
+
+        <div class="recipe-content">
+          <div class="recipe-result-heading">
+            <h3>All Recipes</h3>
+            <span>EXPLORE THE COLLECTION</span>
+          </div>
+
+          <div id="recipeContainer" class="recipe-grid">
+            <!-- JavaScript recipe cards -->
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="journal">
+      <p class="eyebrow">YOUR HOMEBAR, YOUR COLLECTION</p>
+
+      <h2>Every Recipe,<br>In One Place.</h2>
+
+      <p>
+        나만의 재료와 레시피를 정리하고<br>
+        새로운 취향을 발견해 보세요.
+      </p>
+
+      <a href="#recipes" class="main-button">VIEW COLLECTION →</a>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="logo">MY HOMEBAR<span>.</span></div>
+    <p>YOUR PERSONAL RECIPE ARCHIVE.</p>
+    <p>© 2026 MY HOMEBAR</p>
+  </footer>
+
+  <script src="script.js"></script>
+
+=======
   <title>내 술장</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -1145,5 +1282,6 @@
   // 초기 화면 로딩 시 개수 반영
   updateCabinetCount();
 </script>
+  feature/core-logic
 </body>
 </html>
