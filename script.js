@@ -86,9 +86,14 @@ function initIngredientCheckboxes() {
 function filterAndRender() {
     let filtered = allRecipes.filter(recipe => {
         const matchCategory = (selectedCategory === "All") || (recipe.category === selectedCategory);
-        const matchSearch = recipe.name.toLowerCase().includes(searchQuery) || 
-                            recipe.koreanName.includes(searchQuery) ||
-                            recipe.ingredients.some(ing => ing.toLowerCase().includes(searchQuery));
+        
+        // 검색어를 소문자로 변환하고 공백을 정리합니다.
+        const query = searchQuery.toLowerCase();
+
+        const matchSearch = (recipe.name && recipe.name.toLowerCase().includes(query)) || 
+                            (recipe.koreanName && recipe.koreanName.toLowerCase().includes(query)) ||
+                            (recipe.description && recipe.description.toLowerCase().includes(query)) ||
+                            recipe.ingredients.some(ing => ing.toLowerCase().includes(query));
 
         let matchIngredients = true;
         if (ownedIngredients.size > 0) {
