@@ -1,0 +1,46 @@
+[
+  {
+    "id": 1,
+    "name": "Old Fashioned",
+    "koreanName": "올드 패션드",
+    "category": "Whisky",
+    "abv": 32.0,
+    "image": "assets/images/old_fashioned.jpg",
+    "ingredients": ["Bourbon Whisky", "Angostura Bitters", "Sugar Cube"],
+    "description": "위스키의 깊은 풍미를 설탕과 비터로 부드럽게 감싸 안은 클래식 칵테일의 원조.",
+    "recipe": "1. 잔에 설탕과 비터를 넣고 녹입니다.\n2. 얼음을 채우고 버번 위스키를 부어 젓습니다.\n3. 오렌지 제스트로 향을 입힙니다."
+  },
+  {
+    "id": 2,
+    "name": "Martini",
+    "koreanName": "마티니",
+    "category": "Gin",
+    "abv": 30.0,
+    "image": "assets/images/martini.jpg",
+    "ingredients": ["Gin", "Dry Vermouth", "Olives"],
+    "description": "'칵테일의 제왕'이라 불리는 쌉싸름하고 드라이한 매력의 칵테일.",
+    "recipe": "1. 믹싱 글라스에 얼음과 진, 드라이 베르무트를 넣고 젓습니다.\n2. 차갑게 식힌 마티니 잔에 따라냅니다.\n3. 올리브로 가니시합니다."
+  },
+  {
+    "id": 3,
+    "name": "Mojito",
+    "koreanName": "모히또",
+    "category": "Rum",
+    "abv": 15.0,
+    "image": "assets/images/mojito.jpg",
+    "ingredients": ["White Rum", "Mint Leaves", "Lime", "Sugar", "Soda Water"],
+    "description": "상큼한 라임과 민트가 어우러져 청량감을 극대화한 대표적인 롱다링크.",
+    "recipe": "1. 잔에 민트 잎과 라임, 설탕을 넣고 가볍게 으깹니다.\n2. 크러시드 아이스를 채우고 럼을 부어줍니다.\n3. 탄산수를 채우고 가볍게 저어줍니다."
+  },
+  {
+    "id": 4,
+    "name": "Highball",
+    "koreanName": "위스키 하이볼",
+    "category": "Whisky",
+    "abv": 7.0,
+    "image": "assets/images/highball.jpg",
+    "ingredients": ["Whisky", "Soda Water", "Lemon"],
+    "description": "청량한 탄산수와 위스키의 향이 조화롭게 퍼지는 대중적인 칵테일.",
+    "recipe": "1. 얼음을 가득 채운 잔에 위스키를 따릅니다.\n2. 차가운 탄산수를 조심스럽게 채웁니다.\n3. 레몬 슬라이스를 띄워 완성합니다."
+  }
+]

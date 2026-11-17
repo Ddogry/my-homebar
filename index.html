@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  feature/ui-design
   <title>MY HOMEBAR | Recipe Archive</title>
 
   <link rel="stylesheet" href="style.css">
@@ -138,5 +139,1149 @@
 
   <script src="script.js"></script>
 
+=======
+  <title>내 술장</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!-- ==========================================
+       [첫 화면] 로그인 & 회원가입 게이트
+       ========================================== -->
+  <div id="auth-screen" class="auth-overlay">
+    <div class="auth-card">
+      <div class="auth-logo">🍸 MY HOMEBAR</div>
+      <p class="auth-subtitle">나만의 홈바 술장을 관리하려면 로그인하세요</p>
+
+      <!-- 로그인 / 회원가입 전환 탭 -->
+      <div class="auth-tabs">
+        <button type="button" class="auth-tab active" id="show-login-tab">로그인</button>
+        <button type="button" class="auth-tab" id="show-signup-tab">회원가입</button>
+      </div>
+
+      <!-- [폼 1] 로그인 -->
+      <form id="login-form" class="auth-form">
+        <input type="text" id="login-id" placeholder="아이디 입력" required autocomplete="username" />
+        <input type="password" id="login-pw" placeholder="비밀번호 입력" required autocomplete="current-password" />
+        <p id="login-error" class="auth-error hidden"></p>
+        <button type="submit" class="auth-submit-btn">로그인하고 입장하기 ➔</button>
+      </form>
+
+      <!-- [폼 2] 회원가입 -->
+      <form id="signup-form" class="auth-form hidden">
+        <!-- 프로필 사진 선택 & 미리보기 -->
+        <div class="signup-avatar-box">
+          <img id="signup-avatar-preview" src="" alt="프로필 미리보기" />
+          <label for="signup-avatar-input" class="avatar-upload-label">📷 프로필 사진 선택</label>
+          <input type="file" id="signup-avatar-input" accept="image/*" hidden />
+        </div>
+
+        <input type="text" id="signup-nickname" placeholder="닉네임 (예: 홈바마스터)" required />
+        <input type="text" id="signup-id" placeholder="사용할 아이디 (영문/숫자)" required />
+        <input type="password" id="signup-pw" placeholder="비밀번호 설정" required />
+        <p id="signup-error" class="auth-error hidden"></p>
+        <button type="submit" class="auth-submit-btn signup-btn">회원가입 완료</button>
+      </form>
+    </div>
+  </div>
+  <!-- 다크모드 스위치 버튼 영역 -->
+  <div class="header-area">
+    <button id="theme-btn" class="theme-toggle-btn">🌙 다크모드 켜기</button>
+    <!-- 로그인 후 보이는 우측 상단 프로필 버튼 & 드롭다운 카드 -->
+    <div id="user-profile-wrapper" class="profile-wrapper hidden">
+      <button type="button" id="profile-trigger-btn" class="profile-trigger-btn" title="내 계정 정보">
+        <img id="header-avatar-img" src="" alt="프로필" class="header-avatar" />
+        <span id="header-nickname-text" class="header-nickname">사용자</span>
+      </button>
+
+      <!-- 클릭 시 열리는 프로필 카드 -->
+      <div id="profile-dropdown-card" class="profile-dropdown-card hidden">
+        <div class="profile-card-top">
+          <div class="profile-card-avatar-wrap">
+            <img id="card-avatar-img" src="" alt="프로필 사진" class="card-avatar" />
+            <label for="change-avatar-input" class="change-avatar-badge" title="프로필 사진 변경">📷</label>
+            <input type="file" id="change-avatar-input" accept="image/*" hidden />
+          </div>
+          <div class="profile-card-info">
+            <strong id="card-nickname-text">닉네임</strong>
+            <span id="card-userid-text">@userid</span>
+            <small class="profile-stat-pill">🗄️ 내 술장 보유: <b id="card-cabinet-count">0</b>병</small>
+          </div>
+        </div>
+        <hr class="profile-divider" />
+        <button type="button" id="logout-btn" class="logout-btn">🚪 로그아웃</button>
+      </div>
+    </div>
+  </div>
+
+ <div class="liquor-cabinet-container">
+  <!-- 상단 메뉴 탭 (술 고르기 / 내 술장) -->
+  <div class="top-nav-tabs">
+    <button class="nav-tab-btn active" id="tab-browse" data-target="view-browse">
+      🍾 술 고르기 & 담기
+    </button>
+    <button class="nav-tab-btn" id="tab-cabinet" data-target="view-cabinet">
+      🗄️ 내 술장 <span id="cabinet-badge" class="tab-count-badge">0</span>
+    </button>
+    <button class="nav-tab-btn" id="tab-ai" data-target="view-ai">
+      🤖 AI 바텐더
+    </button>
+  </div>
+
+  <!-- [탭 1] 술 고르기 & 임시 바구니 화면 -->
+  <div id="view-browse" class="tab-view">
+    <h2>🍸 술 종류 선택하기</h2>
+    <p class="guide-text">술을 클릭해 오른쪽 바구니에 담은 뒤, <b>'내 술장으로 옮기기'</b>를 눌러 확정하세요.</p>
+
+    <div class="cabinet-layout">
+      <!-- 왼쪽: 술 카테고리 + 세부 20종 목록 -->
+      <div class="cabinet-main">
+        <div class="ingredient-grid" id="category-grid">
+          <div class="ingredient-card" data-category="vodka">
+            <img src="my vodka.png" alt="보드카" class="category-img" />
+            <span class="ingredient-name">보드카</span>
+          </div>
+          <div class="ingredient-card" data-category="rum">
+            <img src="my rum.png" alt="럼" class="category-img" />
+            <span class="ingredient-name">럼</span>
+          </div>
+          <div class="ingredient-card" data-category="gin">
+            <img src="my gin.png" alt="진" class="category-img" />
+            <span class="ingredient-name">진</span>
+          </div>
+          <div class="ingredient-card" data-category="tequila">
+            <img src="my tequila.png" alt="데킬라" class="category-img" />
+            <span class="ingredient-name">데킬라</span>
+          </div>
+          <div class="ingredient-card" data-category="whiskey">
+            <img src="my whiskey.png" alt="위스키" class="category-img" />
+            <span class="ingredient-name">위스키</span>
+          </div>
+          <div class="ingredient-card" data-category="brandy">
+            <img src="my Brandy.png" alt="브랜디" class="category-img" />
+            <span class="ingredient-name">브랜디</span>
+          </div>
+          <div class="ingredient-card" data-category="liqueur">
+            <img src="my Liqueur.png" alt="리큐르" class="category-img" />
+            <span class="ingredient-name">리큐르</span>
+          </div>
+        </div>
+
+        <!-- 카테고리 클릭 시 세부 술 20종이 나열되는 영역 -->
+        <div id="sub-liquor-section" class="sub-liquor-section hidden">
+          <h3 id="sub-liquor-title">세부 종류</h3>
+          <div id="sub-liquor-grid" class="sub-liquor-grid"></div>
+        </div>
+      </div>
+
+      <!-- 오른쪽: 쿠팡 장바구니 역할 (임시 선택 바구니) -->
+      <aside class="selected-cabinet">
+        <div class="cart-header">
+          <h3>🛒 선택한 술 바구니 (<span id="cart-count">0</span>)</h3>
+          <button id="clear-cart-btn" class="clear-cart-btn" title="바구니 비우기">비우기</button>
+        </div>
+
+        <div id="cart-list" class="selected-list">
+          <span class="empty-msg">왼쪽에서 술을 클릭하면 이곳에 임시로 담깁니다.</span>
+        </div>
+
+        <button id="move-to-cabinet-btn" class="move-cabinet-btn" disabled>
+          내 술장으로 옮기기 ➔
+        </button>
+      </aside>
+    </div>
+  </div>
+
+  <!-- [탭 2] 내 술장 전용 화면 -->
+  <div id="view-cabinet" class="tab-view hidden">
+    <div class="my-cabinet-header">
+      <div>
+        <h2>🗄️ 내 술장 (보유 목록)</h2>
+        <p class="guide-text">현재 내 술장에 확정 등록된 술은 총 <b id="cabinet-total-count">0</b>병입니다.</p>
+      </div>
+      <button id="go-browse-btn" class="go-browse-btn">+ 술 더 담으러 가기</button>
+    </div>
+
+    <div id="my-cabinet-grid" class="sub-liquor-grid"></div>
+  </div>
+  <!-- [탭 3] AI 바텐더 화면 -->
+  <div id="view-ai" class="tab-view hidden">
+    <div class="ai-header">
+      <div>
+        <h2>🤖 AI 홈바 바텐더</h2>
+        <p class="guide-text">내 술장 기반 칵테일 추천은 물론, 사이트에 없는 술도 추천받아 바로 등록할 수 있습니다.</p>
+      </div>
+      <button id="ai-key-toggle-btn" class="clear-cart-btn" title="선택 사항: Gemini API 키 연결">
+        🔑 외부 AI 키 연결 (선택)
+      </button>
+    </div>
+
+    <!-- 선택 사항: 외부 Gemini API 키 입력창 -->
+    <div id="ai-key-box" class="ai-key-box hidden">
+      <input type="password" id="gemini-api-key-input" placeholder="Google Gemini API 키를 입력하면 모든 자유 질문에 AI가 답변합니다 (브라우저에만 저장)" />
+      <button id="save-api-key-btn" class="go-browse-btn">저장</button>
+    </div>
+
+    <!-- 빠른 질문 추천 버튼 (사이트 외 술 추천 포함) -->
+    <div class="ai-quick-chips">
+      <button class="ai-chip" data-q="내 술장으로 만들 수 있는 칵테일 추천해줘">🍸 내 술장 칵테일 추천</button>
+      <button class="ai-chip" data-q="사이트에 없는 특별한 술 추천해줘">✨ 사이트 외 숨은 명주 추천</button>
+      <button class="ai-chip" data-q="달달하고 도수 낮은 술 추천해줘">🍹 달달한 저도수 술 추천</button>
+      <button class="ai-chip" data-q="하이볼 만들기 좋은 위스키 알려줘">🥃 하이볼용 위스키 추천</button>
+      <button class="ai-chip" data-q="홈바 입문할 때 꼭 사야 할 기본 술은?">🔰 홈바 입문 필수템</button>
+    </div>
+
+    <!-- 채팅 메시지 창 -->
+    <div id="ai-chat-box" class="ai-chat-box">
+      <div class="ai-msg bot">
+        <div class="ai-avatar">🤖</div>
+        <div class="ai-bubble">
+          안녕하세요! <b>홈바 AI 바텐더</b>입니다. 🍸<br>
+          내 술장에 있는 술로 만들 수 있는 칵테일을 물어보시거나, <b>"사이트에 없는 술 추천해줘"</b>를 눌러 새로운 술을 내 술장에 바로 추가해 보세요!
+        </div>
+      </div>
+    </div>
+
+    <!-- 질문 입력창 -->
+    <form id="ai-chat-form" class="ai-input-area">
+      <input type="text" id="ai-user-input" placeholder="예: 내 술장으로 칵테일 추천해줘 / 사이트에 없는 전통주나 사케 추천해줘" autocomplete="off" required />
+      <button type="submit" class="ai-send-btn">전송 ➤</button>
+    </form>
+  </div>
+</div>
+
+<!-- 화면 하단 알림 메시지(토스트) -->
+<div id="toast-msg" class="toast-msg"></div>
+
+<script>
+  // 1. 기존 다크모드 기능
+  const themeBtn = document.getElementById('theme-btn');
+  if (themeBtn) {
+    themeBtn.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      if (document.body.classList.contains('dark-mode')) {
+        themeBtn.textContent = '☀️ 라이트모드 켜기';
+      } else {
+        themeBtn.textContent = '🌙 다크모드 켜기';
+      }
+    });
+  }
+
+  // 2. 술 카테고리별 인기 20종 데이터 (이름 + 도수 + 사진 경로 + 설명)
+  const liquorData = {
+    vodka: {
+      title: '보드카 인기 20종',
+      fallbackImg: 'my vodka.png',
+      items: [
+        { id: 'v1', name: '앱솔루트 보드카', abv: '40%', img: 'images/vodka_absolut.png', desc: '스웨덴 대표 밀 보드카, 깔끔하고 순수한 맛' },
+        { id: 'v2', name: '앱솔루트 어피치', abv: '38%', img: 'images/vodka_apeach.png', desc: '은은하고 달콤한 복숭아 향의 플레이버 보드카' },
+        { id: 'v3', name: '앱솔루트 시트론', abv: '38%', img: 'images/vodka_citron.png', desc: '상큼한 레몬 향이 돋보이는 칵테일 필수템' },
+        { id: 'v4', name: '앱솔루트 라즈베리', abv: '38%', img: 'images/vodka_raspberri.png', desc: '진하고 달콤한 산딸기 풍미의 인기 보드카' },
+        { id: 'v5', name: '스미노프 레드', abv: '40%', img: 'images/vodka_smirnoff.png', desc: '전 세계 판매량 1위의 가장 대중적인 보드카' },
+        { id: 'v6', name: '스미노프 그린애플', abv: '35%', img: 'images/vodka_smirnoff_apple.png', desc: '풋사과의 새콤달콤함이 살아있는 보드카' },
+        { id: 'v7', name: '그레이 구스', abv: '40%', img: 'images/vodka_greygoose.png', desc: '프랑스산 최고급 밀로 만든 부드러운 프리미엄 보드카' },
+        { id: 'v8', name: '벨베디어', abv: '40%', img: 'images/vodka_belvedere.png', desc: '폴란드산 호밀로 증류해 고소하고 묵직한 풍미' },
+        { id: 'v9', name: '시락 (Cîroc)', abv: '40%', img: 'images/vodka_ciroc.png', desc: '포도로 증류해 화사하고 매끄러운 목넘김의 보드카' },
+        { id: 'v10', name: '케텔 원', abv: '40%', img: 'images/vodka_ketelone.png', desc: '네덜란드 전통 단식 증류기로 만든 깔끔한 보드카' },
+        { id: 'v11', name: '스톨리치나야', abv: '40%', img: 'images/vodka_stoli.png', desc: '정통 방식의 깔끔하고 선명한 맛을 지닌 보드카' },
+        { id: 'v12', name: '핀란디아', abv: '40%', img: 'images/vodka_finlandia.png', desc: '핀란드산 보리와 빙하수로 만든 청량한 보드카' },
+        { id: 'v13', name: '단즈카', abv: '40%', img: 'images/vodka_danzka.png', desc: '알루미늄 보틀로 빠르게 차가워지는 덴마크 보드카' },
+        { id: 'v14', name: '스카이 (SKYY)', abv: '40%', img: 'images/vodka_skyy.png', desc: '4번 증류와 3번 여과로 잡미가 적은 미국 보드카' },
+        { id: 'v15', name: '티토스 핸드메이드', abv: '40%', img: 'images/vodka_titos.png', desc: '옥수수로 만들어 은은한 단맛이 도는 크래프트 보드카' },
+        { id: 'v16', name: '벨루가 노블', abv: '40%', img: 'images/vodka_beluga.png', desc: '꿀과 귀리 추출물이 더해져 실크처럼 부드러운 맛' },
+        { id: 'v17', name: '러시안 스탠다드', abv: '40%', img: 'images/vodka_russian.png', desc: '겨울 밀과 빙하수로 만든 정통 스타일 보드카' },
+        { id: 'v18', name: '크리스탈 헤드', abv: '40%', img: 'images/vodka_crystalhead.png', desc: '해골 모양 병으로 유명한 4회 증류 프리미엄 보드카' },
+        { id: 'v19', name: '레이카 (Reyka)', abv: '40%', img: 'images/vodka_reyka.png', desc: '아이슬란드 화산암 여과와 빙하수로 만든 깔끔한 맛' },
+        { id: 'v20', name: '길비스 보드카', abv: '37.5%', img: 'images/vodka_gilbeys.png', desc: '가성비가 뛰어나 홈텐딩 입문용으로 좋은 보드카' }
+      ]
+    },
+    rum: {
+      title: '럼 인기 20종',
+      fallbackImg: 'my rum.png',
+      items: [
+        { id: 'r1', name: '바카디 카르타 블랑카', abv: '40%', img: 'images/rum_bacardi.png', desc: '모히토·다이키리의 정석, 가장 대중적인 화이트 럼' },
+        { id: 'r2', name: '바카디 카르타 오로', abv: '40%', img: 'images/rum_bacardi_oro.png', desc: '오크통 숙성으로 바닐라·캐러멜 향이 도는 골드 럼' },
+        { id: 'r3', name: '바카디 카르타 네그라', abv: '40%', img: 'images/rum_bacardi_negra.png', desc: '진하고 묵직한 풍미의 다크 럼' },
+        { id: 'r4', name: '바카디 빅 애플', abv: '35%', img: 'images/rum_bacardi_apple.png', desc: '상큼한 사과 향을 더한 플레이버 럼' },
+        { id: 'r5', name: '바카디 모히토', abv: '18%', img: 'images/rum_bacardi_mojito.png', desc: '민트와 라임 향이 미리 블렌딩된 간편한 럼' },
+        { id: 'r6', name: '캡틴 모건 스파이스드', abv: '35%', img: 'images/rum_captain.png', desc: '바닐라와 향신료 향이 매력적인 스파이스드 럼' },
+        { id: 'r7', name: '하바나 클럽 3년', abv: '40%', img: 'images/rum_havana3.png', desc: '쿠바 정통 스타일의 화사한 화이트 럼' },
+        { id: 'r8', name: '하바나 클럽 7년', abv: '40%', img: 'images/rum_havana7.png', desc: '코코아·바닐라·시가 향이 어우러진 숙성 럼' },
+        { id: 'r9', name: '말리부', abv: '21%', img: 'images/rum_malibu.png', desc: '달콤한 코코넛 향으로 누구나 즐기기 좋은 럼' },
+        { id: 'r10', name: '마이어스 오리지널 다크', abv: '40%', img: 'images/rum_myers.png', desc: '진한 당밀 풍미로 칵테일과 베이킹에 쓰이는 다크 럼' },
+        { id: 'r11', name: '론 자카파 23', abv: '40%', img: 'images/rum_zacapa23.png', desc: '고산지대 숙성으로 달콤하고 깊은 프리미엄 럼' },
+        { id: 'r12', name: '디플로마티코 익스클루시바', abv: '40%', img: 'images/rum_diplomatico.png', desc: '토피와 오렌지 껍질 향이 풍부한 베네수엘라 럼' },
+        { id: 'r13', name: '마운트 게이 이클립스', abv: '40%', img: 'images/rum_mountgay.png', desc: '바나나와 바닐라 노트가 특징인 바베이도스 럼' },
+        { id: 'r14', name: '애플턴 에스테이트 시그니처', abv: '40%', img: 'images/rum_appleton.png', desc: '과일과 꿀 향이 조화로운 자메이카 블렌디드 럼' },
+        { id: 'r15', name: '플랜테이션 3 스타', abv: '41.2%', img: 'images/rum_plantation3.png', desc: '카리브해 3개국 럼을 블렌딩한 고품질 화이트 럼' },
+        { id: 'r16', name: '플랜테이션 O.F.T.D.', abv: '69%', img: 'images/rum_plantation_oftd.png', desc: '칵테일에 강렬한 풍미를 더하는 오버프루프 럼' },
+        { id: 'r17', name: '크라켄 블랙 스파이스드', abv: '40%', img: 'images/rum_kraken.png', desc: '진한 커피·초콜릿·향신료 풍미의 블랙 럼' },
+        { id: 'r18', name: '세일러 제리 스파이스드', abv: '40%', img: 'images/rum_sailorjerry.png', desc: '바닐라와 시나몬 향이 진한 고도수 스파이스드 럼' },
+        { id: 'r19', name: '고슬링스 블랙 씰', abv: '40%', img: 'images/rum_goslings.png', desc: '진저비어와 섞는 다크 앤 스토미의 필수 다크 럼' },
+        { id: 'r20', name: '코르바 화이트', abv: '40%', img: 'images/rum_coruba.png', desc: '가성비가 좋아 홈바 베이스로 인기가 높은 럼' }
+      ]
+    },
+    gin: {
+      title: '진 인기 20종',
+      fallbackImg: 'my gin.png',
+      items: [
+        { id: 'g1', name: '봄베이 사파이어', abv: '40%', img: 'images/gin_bombay.png', desc: '10가지 허브 향이 조화롭고 화사한 런던 드라이 진' },
+        { id: 'g2', name: '탱커레이', abv: '43.1%', img: 'images/gin_tanqueray.png', desc: '주니퍼베리 향이 진해 진토닉에 최적화된 클래식 진' },
+        { id: 'g3', name: '탱커레이 넘버 텐', abv: '47.3%', img: 'images/gin_tanqueray10.png', desc: '생감귤류를 증류해 마티니에 완벽한 프리미엄 진' },
+        { id: 'g4', name: '핸드릭스 진', abv: '41.4%', img: 'images/gin_hendricks.png', desc: '오이와 장미 꽃잎 향이 어우러진 스코틀랜드 진' },
+        { id: 'g5', name: '비피터', abv: '40%', img: 'images/gin_beefeater.png', desc: '시트러스와 주니퍼 향이 깔끔한 런던 정통 진' },
+        { id: 'g6', name: '고든스 런던 드라이', abv: '37.5%', img: 'images/gin_gordons.png', desc: '가성비와 밸런스가 뛰어나 가장 널리 쓰이는 진' },
+        { id: 'g7', name: '몽키 47', abv: '47%', img: 'images/gin_monkey47.png', desc: '47가지 식물 재료를 사용한 복합적이고 향긋한 독일 진' },
+        { id: 'g8', name: '로쿠 진 (Roku)', abv: '43%', img: 'images/gin_roku.png', desc: '벚꽃·녹차·유자 등 6가지 재료를 더한 일본 크래프트 진' },
+        { id: 'g9', name: '더 보타니스트', abv: '46%', img: 'images/gin_botanist.png', desc: '스코틀랜드 아일라 섬의 22가지 야생 허브로 만든 진' },
+        { id: 'g10', name: '시타델 진', abv: '44%', img: 'images/gin_citadelle.png', desc: '19가지 향신료가 어우러진 우아한 프랑스산 드라이 진' },
+        { id: 'g11', name: '플리머스 진', abv: '41.2%', img: 'images/gin_plymouth.png', desc: '흙내음과 과일 향이 부드럽게 감도는 영국 정통 진' },
+        { id: 'g12', name: '브로커스 진', abv: '47%', img: 'images/gin_brokers.png', desc: '중절모 뚜껑이 특징인 정통 드라이 스타일의 진' },
+        { id: 'g13', name: '불독 진', abv: '40%', img: 'images/gin_bulldog.png', desc: '용안·양귀비 씨앗 등 이국적 재료가 들어간 부드러운 진' },
+        { id: 'g14', name: '넘버 쓰리 (No.3)', abv: '46%', img: 'images/gin_no3.png', desc: '주니퍼·시트러스·향신료의 황금비율을 자랑하는 진' },
+        { id: 'g15', name: '지바인 플로레종', abv: '40%', img: 'images/gin_gvine.png', desc: '포도 꽃을 증류해 플로럴하고 달콤한 향이 나는 진' },
+        { id: 'g16', name: '엠프레스 1908', abv: '42.5%', img: 'images/gin_empress.png', desc: '토닉워터를 타면 보라색에서 분홍색으로 변하는 진' },
+        { id: 'g17', name: '노르데스 진', abv: '40%', img: 'images/gin_nordes.png', desc: '화이트 와인 베이스에 허브를 더한 화사한 스페인 진' },
+        { id: 'g18', name: '말피 콘 리모네', abv: '41%', img: 'images/gin_malfy.png', desc: '이탈리아 아말피 레몬의 상큼함이 가득한 진' },
+        { id: 'g19', name: '시프스미스', abv: '41.6%', img: 'images/gin_sipsmith.png', desc: '소량 생산 방식으로 만든 깊고 깔끔한 런던 크래프트 진' },
+        { id: 'g20', name: '길비스 진', abv: '37.5%', img: 'images/gin_gilbeys.png', desc: '부담 없는 가격으로 홈파티 칵테일에 자주 쓰이는 진' }
+      ]
+    },
+    tequila: {
+      title: '데킬라 인기 20종',
+      fallbackImg: 'my tequila.png',
+      items: [
+        { id: 't1', name: '호세 쿠엘보 에스페샬 실버', abv: '40%', img: 'images/tequila_jose_silver.png', desc: '칵테일 베이스로 가장 대중적인 실버 데킬라' },
+        { id: 't2', name: '호세 쿠엘보 에스페샬 레포사도', abv: '40%', img: 'images/tequila_jose_repo.png', desc: '오크 숙성으로 부드러운 골드 데킬라' },
+        { id: 't3', name: '호세 쿠엘보 트라디셔널', abv: '40%', img: 'images/tequila_jose_trad.png', desc: '100% 블루 아가베로 만든 정통 블랑코' },
+        { id: 't4', name: '패트론 실버', abv: '40%', img: 'images/tequila_patron_silver.png', desc: '100% 아가베의 신선하고 깔끔한 프리미엄 데킬라' },
+        { id: 't5', name: '패트론 레포사도', abv: '40%', img: 'images/tequila_patron_repo.png', desc: '오크통 숙성으로 바닐라와 꿀 향이 더해진 데킬라' },
+        { id: 't6', name: '패트론 아네호', abv: '40%', img: 'images/tequila_patron_anejo.png', desc: '12개월 이상 숙성해 위스키처럼 부드럽고 깊은 맛' },
+        { id: 't7', name: '돈 훌리오 블랑코', abv: '38%', img: 'images/tequila_donjulio_blanco.png', desc: '상큼한 시트러스와 아가베 풍미의 최고급 블랑코' },
+        { id: 't8', name: '돈 훌리오 레포사도', abv: '38%', img: 'images/tequila_donjulio_repo.png', desc: '다크 초콜릿과 바닐라 여운이 매력적인 데킬라' },
+        { id: 't9', name: '돈 훌리오 1942', abv: '38%', img: 'images/tequila_donjulio_1942.png', desc: '캐러멜과 구운 아가베 향이 압권인 럭셔리 아네호' },
+        { id: 't10', name: '올메카 알토스 플라타', abv: '38%', img: 'images/tequila_olmeca_plata.png', desc: '마가리타용으로 인기가 높은 100% 아가베 데킬라' },
+        { id: 't11', name: '올메카 알토스 레포사도', abv: '38%', img: 'images/tequila_olmeca_repo.png', desc: '달콤한 시트러스와 오크 향이 조화로운 데킬라' },
+        { id: 't12', name: '에스폴론 블랑코', abv: '40%', img: 'images/tequila_espolon_blanco.png', desc: '해골 라벨이 인상적인 화사하고 깔끔한 블랑코' },
+        { id: 't13', name: '에스폴론 레포사도', abv: '40%', img: 'images/tequila_espolon_repo.png', desc: '구운 아가베와 바닐라 향이 감도는 가성비 프리미엄' },
+        { id: 't14', name: '에라두라 실버', abv: '40%', img: 'images/tequila_herradura_silver.png', desc: '45일간 오크통에서 살짝 숙성해 부드러운 블랑코' },
+        { id: 't15', name: '에라두라 레포사도', abv: '40%', img: 'images/tequila_herradura_repo.png', desc: '세계 최초의 레포사도로 알려진 깊고 스파이시한 맛' },
+        { id: 't16', name: '1800 실버', abv: '40%', img: 'images/tequila_1800_silver.png', desc: '두 번 증류해 깔끔하고 부드러운 목넘김의 데킬라' },
+        { id: 't17', name: '1800 레포사도', abv: '40%', img: 'images/tequila_1800_repo.png', desc: '버터스카치와 은은한 향신료 노트가 매력적인 술' },
+        { id: 't18', name: '1800 아네호', abv: '40%', img: 'images/tequila_1800_anejo.png', desc: '프렌치 오크 숙성으로 묵직하고 달콤한 여운의 데킬라' },
+        { id: 't19', name: '카사미고스 블랑코', abv: '40%', img: 'images/tequila_casamigos.png', desc: '부드럽고 은은한 바닐라 향이 감도는 인기 데킬라' },
+        { id: 't20', name: '클라세 아줄 레포사도', abv: '40%', img: 'images/tequila_claseazul.png', desc: '도자기 병으로 유명한 달콤하고 크리미한 최고급 술' }
+      ]
+    },
+    whiskey: {
+      title: '위스키 인기 20종',
+      fallbackImg: 'my whiskey.png',
+      items: [
+        { id: 'w1', name: '잭 다니엘스 올드 넘버 7', abv: '40%', img: 'images/whiskey_jack.png', desc: '콜라와 환상 궁합을 자랑하는 대표 테네시 위스키' },
+        { id: 'w2', name: '잭 다니엘스 테네시 허니', abv: '35%', img: 'images/whiskey_jack_honey.png', desc: '천연 꿀을 더해 달콤하고 부드럽게 즐기는 위스키' },
+        { id: 'w3', name: '짐 빔 화이트', abv: '40%', img: 'images/whiskey_jimbeam.png', desc: '하이볼의 정석으로 불리는 가장 대중적인 버번 위스키' },
+        { id: 'w4', name: '메이커스 마크', abv: '45%', img: 'images/whiskey_makers.png', desc: '밀을 사용해 부드럽고 달콤한 바닐라 향의 버번' },
+        { id: 'w5', name: '와일드 터키 101', abv: '50.5%', img: 'images/whiskey_wildturkey.png', desc: '높은 도수에서 오는 강렬한 바닐라·캐러멜 풍미' },
+        { id: 'w6', name: '버팔로 트레이스', abv: '45%', img: 'images/whiskey_buffalo.png', desc: '바닐라·토피·과일 향의 밸런스가 뛰어난 인기 버번' },
+        { id: 'w7', name: '우드포드 리저브', abv: '43.2%', img: 'images/whiskey_woodford.png', desc: '말린 과일과 진한 오크·초콜릿 향의 프리미엄 버번' },
+        { id: 'w8', name: '조니워커 블랙 라벨', abv: '40%', img: 'images/whiskey_jw_black.png', desc: '12년 이상 숙성 원액을 블렌딩한 스카치 위스키의 기준' },
+        { id: 'w9', name: '조니워커 레드 라벨', abv: '40%', img: 'images/whiskey_jw_red.png', desc: '스파이시하고 스모키해 하이볼로 제격인 스카치 위스키' },
+        { id: 'w10', name: '조니워커 블루 라벨', abv: '40%', img: 'images/whiskey_jw_blue.png', desc: '희귀 원액만 엄선해 벨벳처럼 부드러운 최고급 위스키' },
+        { id: 'w11', name: '발렌타인 파이니스트', abv: '40%', img: 'images/whiskey_ballantines.png', desc: '은은한 꿀과 꽃향기가 매력적인 입문용 스카치' },
+        { id: 'w12', name: '발렌타인 17년', abv: '40%', img: 'images/whiskey_ballantines17.png', desc: '바닐라와 오크, 은은한 스모키함이 어우러진 명품 스카치' },
+        { id: 'w13', name: '시바스 리갈 12년', abv: '40%', img: 'images/whiskey_chivas12.png', desc: '잘 익은 사과와 꿀 향이 부드럽게 퍼지는 블렌디드' },
+        { id: 'w14', name: '글렌피딕 12년', abv: '40%', img: 'images/whiskey_glenfiddich12.png', desc: '상큼한 서양배와 오크 향이 깔끔한 싱글몰트 입문작' },
+        { id: 'w15', name: '글렌리벳 12년', abv: '40%', img: 'images/whiskey_glenlivet12.png', desc: '화사한 과일과 꽃향기가 특징인 부드러운 싱글몰트' },
+        { id: 'w16', name: '맥캘란 12년 더블 캐스크', abv: '40%', img: 'images/whiskey_macallan12.png', desc: '건포도와 꿀, 셰리 오크 풍미가 진한 인기 싱글몰트' },
+        { id: 'w17', name: '발베니 12년 더블우드', abv: '40%', img: 'images/whiskey_balvenie12.png', desc: '꿀과 바닐라, 셰리의 달콤함이 조화로운 싱글몰트' },
+        { id: 'w18', name: '탈리스커 10년', abv: '45.8%', img: 'images/whiskey_talisker10.png', desc: '바다의 짭조름함과 후추, 스모키 피트 향이 매력적인 술' },
+        { id: 'w19', name: '제임슨 아이리쉬 위스키', abv: '40%', img: 'images/whiskey_jameson.png', desc: '3번 증류해 잡미 없이 깔끔하고 부드러운 아이리쉬' },
+        { id: 'w20', name: '산토리 가쿠빈', abv: '40%', img: 'images/whiskey_kakubin.png', desc: '탄산수와 레몬을 곁들이는 일본식 하이볼의 대명사' }
+      ]
+    },
+    brandy: {
+      title: '브랜디 인기 20종',
+      fallbackImg: 'my Brandy.png',
+      items: [
+        { id: 'b1', name: '헤네시 V.S', abv: '40%', img: 'images/brandy_hennessy_vs.png', desc: '전 세계 코냑 판매 1위, 묵직하고 힘 있는 과일·오크 풍미' },
+        { id: 'b2', name: '헤네시 V.S.O.P', abv: '40%', img: 'images/brandy_hennessy_vsop.png', desc: '바닐라와 정향, 계피 향이 우아하게 어우러진 코냑' },
+        { id: 'b3', name: '헤네시 X.O', abv: '40%', img: 'images/brandy_hennessy_xo.png', desc: '다크 초콜릿과 말린 과일 향이 깊게 퍼지는 최고급 코냑' },
+        { id: 'b4', name: '레미 마틴 V.S.O.P', abv: '40%', img: 'images/brandy_remy_vsop.png', desc: '잘 익은 복숭아와 바닐라 향이 풍부한 대표 코냑' },
+        { id: 'b5', name: '레미 마틴 1738', abv: '40%', img: 'images/brandy_remy_1738.png', desc: '구운 빵과 무화과, 토피 향이 진한 부드러운 코냑' },
+        { id: 'b6', name: '레미 마틴 X.O', abv: '40%', img: 'images/brandy_remy_xo.png', desc: '자두와 오렌지 껍질, 헤이즐넛 여운이 긴 럭셔리 코냑' },
+        { id: 'b7', name: '까뮤 V.S.O.P', abv: '40%', img: 'images/brandy_camus_vsop.png', desc: '화사한 꽃향기와 열대 과일 노트가 돋보이는 코냑' },
+        { id: 'b8', name: '까뮤 X.O', abv: '40%', img: 'images/brandy_camus_xo.png', desc: '살구와 오렌지, 은은한 향신료가 조화로운 코냑' },
+        { id: 'b9', name: '꾸르부아지에 V.S', abv: '40%', img: 'images/brandy_courvoisier_vs.png', desc: '나폴레옹이 사랑한 코냑으로 알려진 신선한 과일 풍미' },
+        { id: 'b10', name: '꾸르부아지에 V.S.O.P', abv: '40%', img: 'images/brandy_courvoisier_vsop.png', desc: '복숭아와 구운 아몬드, 자스민 향이 균형 잡힌 코냑' },
+        { id: 'b11', name: '마르텔 V.S', abv: '40%', img: 'images/brandy_martell_vs.png', desc: '가장 오랜 역사를 지닌 코냑 하우스의 상큼하고 깔끔한 술' },
+        { id: 'b12', name: '마르텔 꼬르동 블루', abv: '40%', img: 'images/brandy_martell_cordon.png', desc: '말린 자두와 사과, 모카 향이 일품인 명작 코냑' },
+        { id: 'b13', name: '하인 레어 V.S.O.P', abv: '40%', img: 'images/brandy_hine_vsop.png', desc: '섬세한 흰 꽃과 살구 향이 우아하게 피어나는 코냑' },
+        { id: 'b14', name: '루이 로이에 V.S.O.P', abv: '40%', img: 'images/brandy_louisroyer.png', desc: '꿀과 바닐라, 과일 잼 같은 달콤함이 매력적인 코냑' },
+        { id: 'b15', name: '테세롱 Lot No.90 X.O', abv: '40%', img: 'images/brandy_tesseron90.png', desc: '신선한 배와 모과 향이 살아있는 최고급 X.O 코냑' },
+        { id: 'b16', name: '토레스 10', abv: '38%', img: 'images/brandy_torres10.png', desc: '계피와 바닐라 향이 진하고 달콤한 스페인 대표 브랜디' },
+        { id: 'b17', name: '카르데날 멘도사', abv: '40%', img: 'images/brandy_mendoza.png', desc: '셰리 캐스크 숙성으로 건포도와 초콜릿 향이 진한 브랜디' },
+        { id: 'b18', name: '세인트 레미 V.S.O.P', abv: '40%', img: 'images/brandy_stremy.png', desc: '가성비가 뛰어나 칵테일과 하이볼로 좋은 프렌치 브랜디' },
+        { id: 'b19', name: '불라드 깔바도스', abv: '40%', img: 'images/brandy_calvados.png', desc: '사과를 증류해 만든 상큼하고 향긋한 프랑스 사과 브랜디' },
+        { id: 'b20', name: '피스코 카펠', abv: '40%', img: 'images/brandy_pisco.png', desc: '포도로 만든 투명한 남미 대표 브랜디, 피스코 사워 재료' }
+      ]
+    },
+    liqueur: {
+      title: '리큐르 인기 20종',
+      fallbackImg: 'my Liqueur.png',
+      items: [
+        { id: 'l1', name: '깔루아 (Kahlúa)', abv: '16%', img: 'images/liq_kahlua.png', desc: '진한 커피와 바닐라 향으로 깔루아 밀크에 쓰이는 리큐르' },
+        { id: 'l2', name: '베일리스 오리지널', abv: '17%', img: 'images/liq_baileys.png', desc: '아이리쉬 위스키와 생크림, 초콜릿이 어우러진 크림 리큐르' },
+        { id: 'l3', name: '예거마이스터', abv: '35%', img: 'images/liq_jager.png', desc: '56가지 허브와 향신료로 만든 독일 대표 허브 리큐르' },
+        { id: 'l4', name: '코인트로 (Cointreau)', abv: '40%', img: 'images/liq_cointreau.png', desc: '맑고 상큼한 오렌지 껍질 향의 프리미엄 트리플 섹' },
+        { id: 'l5', name: '그랑 마르니에', abv: '40%', img: 'images/liq_grandmarnier.png', desc: '코냑 베이스에 비터 오렌지 향을 더한 우아한 리큐르' },
+        { id: 'l6', name: '디사론노 아마레또', abv: '28%', img: 'images/liq_disaronno.png', desc: '달콤한 아몬드와 살구씨 향이 매력적인 이탈리아 리큐르' },
+        { id: 'l7', name: '미도리 (Midori)', abv: '20%', img: 'images/liq_midori.png', desc: '선명한 초록빛과 달콤한 멜론 풍미의 인기 리큐르' },
+        { id: 'l8', name: '피치트리 (Peachtree)', abv: '20%', img: 'images/liq_peachtree.png', desc: '잘 익은 복숭아의 향긋하고 달콤한 맛이 살아있는 술' },
+        { id: 'l9', name: '말리부 (Malibu)', abv: '21%', img: 'images/liq_malibu.png', desc: '파인애플 주스나 콜라와 섞기 좋은 달콤한 코코넛 리큐르' },
+        { id: 'l10', name: '힙노틱 (Hpnotiq)', abv: '17%', img: 'images/liq_hpnotiq.png', desc: '코냑·보드카와 열대과일 주스가 섞인 영롱한 하늘빛 술' },
+        { id: 'l11', name: '엑스레이티드', abv: '17%', img: 'images/liq_xrated.png', desc: '블러드 오렌지와 망고·패션프루트 향의 핑크빛 리큐르' },
+        { id: 'l12', name: '아그와 데 볼리비아', abv: '30%', img: 'images/liq_agwa.png', desc: '코카 잎과 허브를 블렌딩한 상쾌하고 짜릿한 초록빛 술' },
+        { id: 'l13', name: '캄파리 (Campari)', abv: '24%', img: 'images/liq_campari.png', desc: '붉은빛과 쌉싸름한 허브·오렌지 풍미의 식전주 리큐르' },
+        { id: 'l14', name: '아페롤 (Aperol)', abv: '11%', img: 'images/liq_aperol.png', desc: '가볍고 상큼한 오렌지·허브 맛의 스프리츠 필수 리큐르' },
+        { id: 'l15', name: '샴보드 (Chambord)', abv: '16.5%', img: 'images/liq_chambord.png', desc: '블랙 라즈베리와 코냑·꿀이 조화로운 진한 베리 리큐르' },
+        { id: 'l16', name: '생 제르맹', abv: '20%', img: 'images/liq_stgermain.png', desc: '엘더플라워 꽃의 화사하고 달콤한 향이 가득한 리큐르' },
+        { id: 'l17', name: '볼스 트리플 섹', abv: '38%', img: 'images/liq_bols_triplesec.png', desc: '칵테일에 상큼한 오렌지 향을 더하는 가성비 좋은 리큐르' },
+        { id: 'l18', name: '볼스 블루 큐라소', abv: '21%', img: 'images/liq_bols_blue.png', desc: '칵테일을 시원한 바다색으로 물들이는 오렌지 리큐르' },
+        { id: 'l19', name: '프란젤리코', abv: '20%', img: 'images/liq_frangelico.png', desc: '고소하고 달콤한 헤이즐넛 풍미의 수도사 모양 병 리큐르' },
+        { id: 'l20', name: '압생트 (Absinthe)', abv: '68%', img: 'images/liq_absinthe.png', desc: '웜우드와 아니스 허브 향이 강렬한 고도수 초록 리큐르' }
+      ]
+    }
+  };
+
+  // 카테고리 한글 이름 매핑
+  const categoryLabels = {
+    vodka: '보드카',
+    rum: '럼',
+    gin: '진',
+    tequila: '데킬라',
+    whiskey: '위스키',
+    brandy: '브랜디',
+    liqueur: '리큐르'
+  };
+
+  // ==========================================
+  // 로그인 / 회원가입 / 유튜브형 프로필 카드 시스템
+  // ==========================================
+  const cartLiquors = new Map();
+  const myCabinet = new Map();
+  let currentUser = null;
+
+  // 기본 프로필 이미지 (사진 미등록 시 자동 생성)
+  function createDefaultAvatar(text = '🍸') {
+    const letter = (Array.from((text || '🍸').trim())[0] || '🍸').toUpperCase();
+    const canvas = document.createElement('canvas');
+    canvas.width = 120;
+    canvas.height = 120;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ff9800';
+    ctx.fillRect(0, 0, 120, 120);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 52px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(letter, 60, 63);
+    return canvas.toDataURL('image/png');
+  }
+
+  // 업로드한 이미지를 정사각형(160x160)으로 압축 변환
+  function resizeImageFile(file) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const size = 160;
+          canvas.width = size;
+          canvas.height = size;
+          const ctx = canvas.getContext('2d');
+          const minSide = Math.min(img.width, img.height);
+          const sx = (img.width - minSide) / 2;
+          const sy = (img.height - minSide) / 2;
+          ctx.drawImage(img, sx, sy, minSide, minSide, 0, 0, size, size);
+          resolve(canvas.toDataURL('image/jpeg', 0.82));
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function getUsersDB() {
+    try {
+      return JSON.parse(localStorage.getItem('myHomebarUsers') || '{}');
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveUsersDB(users) {
+    localStorage.setItem('myHomebarUsers', JSON.stringify(users));
+  }
+
+  // 현재 로그인한 계정의 술장 데이터 불러오기
+  function loadUserCabinet() {
+    myCabinet.clear();
+    cartLiquors.clear();
+    if (!currentUser) return;
+
+    const userKey = `myHomebarCabinet_${currentUser.id}`;
+    let saved = localStorage.getItem(userKey);
+
+    if (!saved && localStorage.getItem('myHomebarCabinet')) {
+      saved = localStorage.getItem('myHomebarCabinet');
+      localStorage.setItem(userKey, saved);
+      localStorage.removeItem('myHomebarCabinet');
+    }
+
+    try {
+      JSON.parse(saved || '[]').forEach(item => myCabinet.set(item.id, item));
+    } catch (e) {}
+  }
+
+  function saveCabinetToStorage() {
+    if (!currentUser) return;
+    try {
+      localStorage.setItem(`myHomebarCabinet_${currentUser.id}`, JSON.stringify(Array.from(myCabinet.values())));
+    } catch (e) {}
+    const cardCountEl = document.getElementById('card-cabinet-count');
+    if (cardCountEl) cardCountEl.textContent = myCabinet.size;
+  }
+
+  // DOM 요소 연결
+  const authScreen = document.getElementById('auth-screen');
+  const showLoginTab = document.getElementById('show-login-tab');
+  const showSignupTab = document.getElementById('show-signup-tab');
+  const loginForm = document.getElementById('login-form');
+  const signupForm = document.getElementById('signup-form');
+  const loginErrorEl = document.getElementById('login-error');
+  const signupErrorEl = document.getElementById('signup-error');
+
+  const signupAvatarInput = document.getElementById('signup-avatar-input');
+  const signupAvatarPreview = document.getElementById('signup-avatar-preview');
+  let pendingSignupAvatar = '';
+
+  signupAvatarPreview.src = createDefaultAvatar('🍸');
+
+  signupAvatarInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    pendingSignupAvatar = await resizeImageFile(file);
+    signupAvatarPreview.src = pendingSignupAvatar;
+  });
+
+  showLoginTab.addEventListener('click', () => {
+    showLoginTab.classList.add('active');
+    showSignupTab.classList.remove('active');
+    loginForm.classList.remove('hidden');
+    signupForm.classList.add('hidden');
+    loginErrorEl.classList.add('hidden');
+  });
+
+  showSignupTab.addEventListener('click', () => {
+    showSignupTab.classList.add('active');
+    showLoginTab.classList.remove('active');
+    signupForm.classList.remove('hidden');
+    loginForm.classList.add('hidden');
+    signupErrorEl.classList.add('hidden');
+  });
+
+  // 회원가입 처리
+  signupForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const nickname = document.getElementById('signup-nickname').value.trim();
+    const id = document.getElementById('signup-id').value.trim();
+    const pw = document.getElementById('signup-pw').value.trim();
+
+    const users = getUsersDB();
+    if (users[id]) {
+      signupErrorEl.textContent = '⚠️ 이미 사용 중인 아이디입니다.';
+      signupErrorEl.classList.remove('hidden');
+      return;
+    }
+
+    const avatar = pendingSignupAvatar || createDefaultAvatar(nickname);
+    users[id] = { id, pw, nickname, avatar };
+    saveUsersDB(users);
+
+    localStorage.setItem('myHomebarCurrentUserId', id);
+    pendingSignupAvatar = '';
+    signupForm.reset();
+    signupAvatarPreview.src = createDefaultAvatar('🍸');
+    applyLoginSession(users[id]);
+    showToast(`🎉 환영합니다, ${nickname}님! 회원가입이 완료되었습니다.`);
+  });
+
+  // 로그인 처리
+  loginForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const id = document.getElementById('login-id').value.trim();
+    const pw = document.getElementById('login-pw').value.trim();
+
+    const users = getUsersDB();
+    const found = users[id];
+    if (!found || found.pw !== pw) {
+      loginErrorEl.textContent = '⚠️ 아이디 또는 비밀번호가 일치하지 않습니다.';
+      loginErrorEl.classList.remove('hidden');
+      return;
+    }
+
+    localStorage.setItem('myHomebarCurrentUserId', id);
+    loginForm.reset();
+    loginErrorEl.classList.add('hidden');
+    applyLoginSession(found);
+    showToast(`🍸 ${found.nickname}님, 어서 오세요!`);
+  });
+
+  // 로그인 후 프로필 카드 반영
+  const profileWrapper = document.getElementById('user-profile-wrapper');
+  const profileTriggerBtn = document.getElementById('profile-trigger-btn');
+  const profileDropdownCard = document.getElementById('profile-dropdown-card');
+  const changeAvatarInput = document.getElementById('change-avatar-input');
+  const logoutBtn = document.getElementById('logout-btn');
+
+  function updateProfileCardUI() {
+    if (!currentUser) return;
+    const avatarSrc = currentUser.avatar || createDefaultAvatar(currentUser.nickname);
+    document.getElementById('header-avatar-img').src = avatarSrc;
+    document.getElementById('header-nickname-text').textContent = currentUser.nickname;
+    document.getElementById('card-avatar-img').src = avatarSrc;
+    document.getElementById('card-nickname-text').textContent = currentUser.nickname;
+    document.getElementById('card-userid-text').textContent = `@${currentUser.id}`;
+    document.getElementById('card-cabinet-count').textContent = myCabinet.size;
+  }
+
+  function applyLoginSession(user) {
+    currentUser = user;
+    loadUserCabinet();
+    authScreen.classList.add('hidden');
+    profileWrapper.classList.remove('hidden');
+    profileDropdownCard.classList.add('hidden');
+    updateProfileCardUI();
+
+    if (typeof updateCabinetCount === 'function') updateCabinetCount();
+    if (typeof renderCartList === 'function') renderCartList();
+    if (typeof renderMyCabinet === 'function') renderMyCabinet();
+  }
+
+  profileTriggerBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    updateProfileCardUI();
+    profileDropdownCard.classList.toggle('hidden');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!profileWrapper.contains(e.target)) {
+      profileDropdownCard.classList.add('hidden');
+    }
+  });
+
+  // 프로필 카드 안에서 사진 즉시 변경
+  changeAvatarInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file || !currentUser) return;
+    const newAvatar = await resizeImageFile(file);
+    currentUser.avatar = newAvatar;
+
+    const users = getUsersDB();
+    if (users[currentUser.id]) {
+      users[currentUser.id].avatar = newAvatar;
+      saveUsersDB(users);
+    }
+    updateProfileCardUI();
+    showToast('📸 프로필 사진이 변경되었습니다!');
+  });
+
+  // 로그아웃 처리
+  logoutBtn.addEventListener('click', () => {
+    localStorage.removeItem('myHomebarCurrentUserId');
+    currentUser = null;
+    myCabinet.clear();
+    cartLiquors.clear();
+    profileDropdownCard.classList.add('hidden');
+    profileWrapper.classList.add('hidden');
+    authScreen.classList.remove('hidden');
+    showToast('🚪 로그아웃되었습니다.');
+  });
+
+  // 새로고침 시 기존 로그인 세션 복원
+  (function restoreSession() {
+    const savedId = localStorage.getItem('myHomebarCurrentUserId');
+    const users = getUsersDB();
+    if (savedId && users[savedId]) {
+      applyLoginSession(users[savedId]);
+    }
+  })();
+
+  // DOM 요소 가져오기
+  const categoryCards = document.querySelectorAll('#category-grid .ingredient-card');
+  const subSection = document.getElementById('sub-liquor-section');
+  const subTitle = document.getElementById('sub-liquor-title');
+  const subGrid = document.getElementById('sub-liquor-grid');
+
+  const cartListEl = document.getElementById('cart-list');
+  const cartCountEl = document.getElementById('cart-count');
+  const clearCartBtn = document.getElementById('clear-cart-btn');
+  const moveToCabinetBtn = document.getElementById('move-to-cabinet-btn');
+
+  const cabinetBadgeEl = document.getElementById('cabinet-badge');
+  const cabinetTotalCountEl = document.getElementById('cabinet-total-count');
+  const myCabinetGridEl = document.getElementById('my-cabinet-grid');
+  const toastEl = document.getElementById('toast-msg');
+
+  // 알림 토스트 띄우기
+  let toastTimer;
+  function showToast(message) {
+    toastEl.textContent = message;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      toastEl.classList.remove('show');
+    }, 2500);
+  }
+
+  // 상단 탭 전환 기능 ('술 고르기' <-> '내 술장')
+  const tabButtons = document.querySelectorAll('.nav-tab-btn');
+  const tabViews = document.querySelectorAll('.tab-view');
+
+  function switchTab(targetId) {
+    tabButtons.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.target === targetId);
+    });
+    tabViews.forEach(view => {
+      view.classList.toggle('hidden', view.id !== targetId);
+    });
+    if (targetId === 'view-cabinet') {
+      renderMyCabinet();
+    }
+  }
+
+  tabButtons.forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.target));
+  });
+
+  document.getElementById('go-browse-btn').addEventListener('click', () => {
+    switchTab('view-browse');
+  });
+
+  // 큰 카테고리 클릭 이벤트
+  categoryCards.forEach(card => {
+    card.addEventListener('click', () => {
+      categoryCards.forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+      renderSubLiquors(card.dataset.category);
+    });
+  });
+
+  // 세부 술 20종 목록 그리기
+  function renderSubLiquors(categoryKey) {
+    const data = liquorData[categoryKey];
+    if (!data) return;
+
+    subTitle.textContent = `🍾 ${data.title} (클릭해서 바구니에 담기)`;
+    subGrid.innerHTML = '';
+
+    data.items.forEach(item => {
+      const inCabinet = myCabinet.has(item.id);
+      const inCart = cartLiquors.has(item.id);
+
+      const itemCard = document.createElement('div');
+      itemCard.className = `sub-card ${inCabinet ? 'in-cabinet' : ''} ${inCart ? 'selected' : ''}`;
+
+      let badgeText = '+ 바구니 담기';
+      if (inCabinet) badgeText = '🏠 내 술장 보유중';
+      else if (inCart) badgeText = '🛒 바구니 담김';
+
+      itemCard.innerHTML = `
+        <img src="${item.img}" alt="${item.name}" onerror="this.onerror=null; this.src='${data.fallbackImg}';" />
+        <h4>${item.name}</h4>
+        <span class="abv-badge">도수 ${item.abv}</span>
+        <p>${item.desc}</p>
+        <span class="select-badge">${badgeText}</span>
+      `;
+
+      itemCard.addEventListener('click', () => {
+        if (myCabinet.has(item.id)) {
+          showToast(`이미 내 술장에 들어있는 술입니다! (${item.name})`);
+          return;
+        }
+
+        if (cartLiquors.has(item.id)) {
+          cartLiquors.delete(item.id);
+        } else {
+          cartLiquors.set(item.id, {
+            ...item,
+            categoryKey,
+            fallbackImg: data.fallbackImg
+          });
+        }
+        renderSubLiquors(categoryKey);
+        renderCartList();
+      });
+
+      subGrid.appendChild(itemCard);
+    });
+
+    subSection.classList.remove('hidden');
+  }
+
+  // 오른쪽 '선택한 술 바구니' 업데이트
+  function renderCartList() {
+    cartCountEl.textContent = cartLiquors.size;
+    moveToCabinetBtn.disabled = cartLiquors.size === 0;
+    cartListEl.innerHTML = '';
+
+    if (cartLiquors.size === 0) {
+      cartListEl.innerHTML = '<span class="empty-msg">왼쪽에서 술을 클릭하면 이곳에 임시로 담깁니다.</span>';
+      return;
+    }
+
+    cartLiquors.forEach((item, id) => {
+      const badge = document.createElement('span');
+      badge.className = 'cabinet-tag';
+      badge.textContent = `${item.name} (${item.abv}) ✕`;
+      badge.title = '클릭하면 바구니에서 빠집니다';
+      badge.addEventListener('click', () => {
+        cartLiquors.delete(id);
+        renderCartList();
+        const activeCard = document.querySelector('#category-grid .ingredient-card.active');
+        if (activeCard) renderSubLiquors(activeCard.dataset.category);
+      });
+      cartListEl.appendChild(badge);
+    });
+  }
+
+  // 바구니 전체 비우기 버튼
+  clearCartBtn.addEventListener('click', () => {
+    if (cartLiquors.size === 0) return;
+    cartLiquors.clear();
+    renderCartList();
+    const activeCard = document.querySelector('#category-grid .ingredient-card.active');
+    if (activeCard) renderSubLiquors(activeCard.dataset.category);
+  });
+
+  // 핵심: '내 술장으로 옮기기' 버튼 클릭 시 확정 이동
+  moveToCabinetBtn.addEventListener('click', () => {
+    if (cartLiquors.size === 0) return;
+
+    const movedCount = cartLiquors.size;
+    cartLiquors.forEach((item, id) => {
+      myCabinet.set(id, item);
+    });
+
+    cartLiquors.clear();
+    saveCabinetToStorage();
+    updateCabinetCount();
+    renderCartList();
+
+    const activeCard = document.querySelector('#category-grid .ingredient-card.active');
+    if (activeCard) renderSubLiquors(activeCard.dataset.category);
+
+    showToast(`✅ ${movedCount}병의 술이 '내 술장'으로 옮겨졌습니다!`);
+  });
+
+  // 내 술장 개수 뱃지 업데이트
+  function updateCabinetCount() {
+    cabinetBadgeEl.textContent = myCabinet.size;
+    cabinetTotalCountEl.textContent = myCabinet.size;
+  }
+
+  // [탭 2] 내 술장 전용 화면 그리기
+  function renderMyCabinet() {
+    updateCabinetCount();
+    myCabinetGridEl.innerHTML = '';
+
+    if (myCabinet.size === 0) {
+      myCabinetGridEl.innerHTML = `
+        <div class="empty-cabinet-box">
+          <p>아직 내 술장에 등록된 술이 없습니다.</p>
+          <span>'술 고르기 & 담기' 탭에서 술을 바구니에 담은 뒤 옮겨보세요!</span>
+        </div>
+      `;
+      return;
+    }
+
+    myCabinet.forEach((item, id) => {
+      const card = document.createElement('div');
+      card.className = 'sub-card cabinet-owned-card';
+      const catName = categoryLabels[item.categoryKey] || '기타';
+
+      card.innerHTML = `
+        <span class="cat-pill">${catName}</span>
+        <img src="${item.img}" alt="${item.name}" onerror="this.onerror=null; this.src='${item.fallbackImg}';" />
+        <h4>${item.name}</h4>
+        <span class="abv-badge">도수 ${item.abv}</span>
+        <p>${item.desc}</p>
+        <button class="remove-cabinet-btn">🗑️ 술장에서 빼기</button>
+      `;
+
+      card.querySelector('.remove-cabinet-btn').addEventListener('click', () => {
+        myCabinet.delete(id);
+        saveCabinetToStorage();
+        renderMyCabinet();
+        const activeCard = document.querySelector('#category-grid .ingredient-card.active');
+        if (activeCard) renderSubLiquors(activeCard.dataset.category);
+        showToast(`🗑️ '${item.name}'을(를) 내 술장에서 뺐습니다.`);
+      });
+
+      myCabinetGridEl.appendChild(card);
+    });
+  }
+// ==========================================
+  // [탭 3] AI 바텐더 + 사이트 외 술 추천 & 바로 담기
+  // ==========================================
+  const aiChatBox = document.getElementById('ai-chat-box');
+  const aiChatForm = document.getElementById('ai-chat-form');
+  const aiUserInput = document.getElementById('ai-user-input');
+  const aiKeyToggleBtn = document.getElementById('ai-key-toggle-btn');
+  const aiKeyBox = document.getElementById('ai-key-box');
+  const geminiKeyInput = document.getElementById('gemini-api-key-input');
+  const saveApiKeyBtn = document.getElementById('save-api-key-btn');
+
+  // 선택 사항: 개인 Gemini API 키 불러오기 (브라우저에만 저장되어 GitHub에 유출되지 않음)
+  let userGeminiApiKey = localStorage.getItem('homebar_gemini_key') || '';
+  if (userGeminiApiKey) {
+    geminiKeyInput.value = userGeminiApiKey;
+    aiKeyToggleBtn.textContent = '🔑 외부 AI 연결됨';
+  }
+
+  aiKeyToggleBtn.addEventListener('click', () => {
+    aiKeyBox.classList.toggle('hidden');
+  });
+
+  saveApiKeyBtn.addEventListener('click', () => {
+    userGeminiApiKey = geminiKeyInput.value.trim();
+    localStorage.setItem('homebar_gemini_key', userGeminiApiKey);
+    aiKeyBox.classList.add('hidden');
+    aiKeyToggleBtn.textContent = userGeminiApiKey ? '🔑 외부 AI 연결됨' : '🔑 외부 AI 키 연결 (선택)';
+    showToast(userGeminiApiKey ? '✅ Gemini API 키가 브라우저에 저장되었습니다.' : 'API 키가 해제되었습니다.');
+  });
+
+  // 채팅 말풍선 생성
+  function appendChatMessage(sender, htmlText) {
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `ai-msg ${sender}`;
+
+    if (sender === 'bot') {
+      msgDiv.innerHTML = `
+        <div class="ai-avatar">🤖</div>
+        <div class="ai-bubble">${htmlText}</div>
+      `;
+    } else {
+      msgDiv.innerHTML = `
+        <div class="ai-bubble">${htmlText}</div>
+      `;
+    }
+
+    aiChatBox.appendChild(msgDiv);
+    aiChatBox.scrollTop = aiChatBox.scrollHeight;
+    return msgDiv;
+  }
+
+  // 통합 AI 답변 생성기 (사이트 외 술 추천 + 내 술장 연동 + 140종 검색)
+  function generateBuiltInAIReply(question) {
+    const q = question.toLowerCase().replace(/\s+/g, '');
+    const ownedItems = Array.from(myCabinet.values());
+    const ownedCats = new Set(ownedItems.map(i => i.categoryKey));
+
+    // 1. 사이트에 없는 술 추천 & 바로 내 술장에 담기
+    if (q.includes('없는') || q.includes('외에') || q.includes('숨은') || q.includes('전통주') || q.includes('사케') || q.includes('와인') || q.includes('샴페인') || q.includes('피트') || q.includes('새로운')) {
+      const hiddenLiquors = [
+        { id: 'ext1', name: '화요 41 (증류식 소주)', abv: '41%', desc: '쌀 100% 감압 증류로 깔끔하고 토닉워터와 잘 어울리는 프리미엄 한국 증류주' },
+        { id: 'ext2', name: '닷사이 23 (준마이 다이긴죠)', abv: '16%', desc: '쌀을 23%까지 깎아 만든 화사한 과일 향의 일본 최고급 사케' },
+        { id: 'ext3', name: '라프로익 10년 (아일라 싱글몰트)', abv: '40%', desc: '강렬한 바다·훈연 피트 향이 매력적인 마니아용 스카치 위스키' },
+        { id: 'ext4', name: '모엣 & 샹동 임페리얼', abv: '12%', desc: '청사과와 시트러스, 섬세한 기포가 어우러진 프랑스 대표 샴페인' },
+        { id: 'ext5', name: '복순도가 손막걸리', abv: '6.5%', desc: '천연 탄산이 샴페인처럼 톡 쏘고 새콤달콤한 한국 전통 발효주' }
+      ];
+
+      const listHtml = hiddenLiquors.map(item => {
+        const alreadyOwned = myCabinet.has(item.id);
+        return `
+          <div class="ai-rec-item">
+            <div>
+              <b>${item.name}</b> <span class="abv-badge">${item.abv}</span><br>
+              <small>${item.desc}</small>
+            </div>
+            <button class="ai-add-custom-btn" 
+              data-id="${item.id}" 
+              data-name="${item.name}" 
+              data-abv="${item.abv}" 
+              data-desc="${item.desc}"
+              ${alreadyOwned ? 'disabled' : ''}>
+              ${alreadyOwned ? '✔ 보유중' : '+ 내 술장에 추가'}
+            </button>
+          </div>
+        `;
+      }).join('');
+
+      return `사이트 기본 목록(140종)에는 없지만 꼭 추천하고 싶은 <b>특별한 술 5가지</b>입니다! ✨<br>마음에 드는 술은 버튼을 눌러 <b>내 술장(기타 카테고리)</b>에 바로 등록할 수 있어요.<div class="ai-rec-list">${listHtml}</div>`;
+    }
+
+    // 2. 내 술장 기반 칵테일 추천
+    if (q.includes('내술장') || q.includes('칵테일') || q.includes('만들수') || q.includes('레시피')) {
+      if (ownedItems.length === 0) {
+        return `현재 <b>내 술장이 비어 있어요!</b> 😅<br>먼저 <b>[🍾 술 고르기 & 담기]</b> 탭에서 집에 있는 술을 담아주시면, 그 술로 만들 수 있는 칵테일을 바로 추천해 드릴게요.`;
+      }
+
+      const ownedNames = ownedItems.map(i => i.name).join(', ');
+      const recipes = [];
+
+      if (ownedCats.has('vodka')) {
+        recipes.push('• <b>모스코 뮬:</b> 보드카 + 진저비어 + 라임즙 (상쾌하고 깔끔한 맛)');
+        recipes.push('• <b>스크류드라이버:</b> 보드카 + 오렌지 주스 (가장 만들기 쉬운 칵테일)');
+      }
+      if (ownedCats.has('rum')) {
+        recipes.push('• <b>모히토:</b> 화이트 럼 + 탄산수 + 라임 + 민트 + 설탕');
+        recipes.push('• <b>럼 앤 콕 (쿠바 리브레):</b> 럼 + 콜라 + 라임 조각');
+      }
+      if (ownedCats.has('gin')) {
+        recipes.push('• <b>진토닉:</b> 진 + 토닉워터 + 레몬/라임 조각 (홈바의 정석)');
+      }
+      if (ownedCats.has('tequila')) {
+        recipes.push('• <b>테킬라 선라이즈:</b> 데킬라 + 오렌지 주스 + 그레나딘 시럽');
+        recipes.push('• <b>팔로마:</b> 데킬라 + 자몽 탄산음료 + 라임');
+      }
+      if (ownedCats.has('whiskey')) {
+        recipes.push('• <b>위스키 하이볼:</b> 위스키 + 차가운 탄산수(1:3 비율) + 레몬');
+        recipes.push('• <b>잭콕:</b> 위스키 + 콜라 + 얼음');
+      }
+      if (ownedCats.has('brandy')) {
+        recipes.push('• <b>브랜디 하이볼:</b> 브랜디 + 진저에일(또는 탄산수) + 레몬');
+      }
+      if (ownedItems.some(i => i.id === 'l1')) {
+        recipes.push('• <b>깔루아 밀크:</b> 깔루아 + 우유 (1:3 비율로 섞으면 완성!)');
+      }
+      if (ownedItems.some(i => i.id === 'l9' || i.id === 'r9')) {
+        recipes.push('• <b>말리부 파인:</b> 말리부 + 파인애플 주스 (달콤한 휴양지 맛)');
+      }
+      if (ownedCats.has('custom')) {
+        recipes.push('• <b>스페셜 하이볼 / 온더락:</b> 직접 추가하신 특별 주류에 얼음과 토닉워터(1:2)를 곁들여 보세요!');
+      }
+
+      return `현재 내 술장에 <b>[${ownedNames}]</b>(총 ${ownedItems.length}병)이 있네요! 🗄️<br><br>지금 바로 만들 수 있는 추천 칵테일입니다:<br>${recipes.slice(0, 5).join('<br>')}`;
+    }
+
+    // 3. 140종 술 데이터에서 특정 술 이름 검색
+    const allLiquors = [];
+    Object.entries(liquorData).forEach(([catKey, catObj]) => {
+      catObj.items.forEach(item => {
+        allLiquors.push({ ...item, catName: categoryLabels[catKey] });
+      });
+    });
+
+    const matchedLiquor = allLiquors.find(item => {
+      const cleanName = item.name.toLowerCase().replace(/\s+/g, '');
+      const shortName = cleanName.split('(')[0];
+      return q.includes(shortName) && shortName.length >= 2;
+    });
+
+    if (matchedLiquor) {
+      const hasIt = myCabinet.has(matchedLiquor.id) ? '✅ 현재 <b>내 술장에 보유 중</b>인 술입니다!' : '💡 아직 내 술장에는 없는 술이에요.';
+      return `<b>🍾 ${matchedLiquor.name}</b> (${matchedLiquor.catName})<br>• <b>도수:</b> ${matchedLiquor.abv}<br>• <b>특징:</b> ${matchedLiquor.desc}<br>• ${hasIt}`;
+    }
+
+    // 4. 조건별 추천 (달달한 / 저도수 / 하이볼 / 입문)
+    if (q.includes('달달') || q.includes('도수낮') || q.includes('저도수') || q.includes('순한')) {
+      return `달콤하고 도수가 낮아 부담 없이 즐기기 좋은 인기 술 4가지입니다! 🍹<br><br>• <b>아페롤 (11%):</b> 상큼한 오렌지·허브 향의 가벼운 리큐르<br>• <b>깔루아 (16%):</b> 달콤한 커피 우유 맛 칵테일 필수템<br>• <b>베일리스 (17%):</b> 부드러운 생크림·초콜릿 풍미<br>• <b>말리부 (21%):</b> 주스나 콜라에 타기 좋은 달콤한 코코넛 럼`;
+    }
+
+    if (q.includes('하이볼')) {
+      return `탄산수만 부어 시원하게 마시기 좋은 <b>하이볼 추천 술</b>입니다! 🥃<br><br>• <b>산토리 가쿠빈 (40%):</b> 일본식 정통 하이볼의 대명사<br>• <b>짐 빔 화이트 (40%):</b> 고소하고 달콤한 버번 하이볼의 정석<br>• <b>조니워커 블랙 라벨 (40%):</b> 은은한 스모키 향이 매력적인 스카치 하이볼<br>• <b>제임슨 (40%):</b> 부드럽고 깔끔한 아이리쉬 하이볼`;
+    }
+
+    if (q.includes('입문') || q.includes('기본') || q.includes('추천')) {
+      return `홈바를 처음 시작할 때 가장 활용도가 높은 <b>입문 필수 4병</b>을 추천해 드려요! 🔰<br><br>1. <b>앱솔루트 보드카 (40%):</b> 어떤 주스·탄산음료와도 잘 어울리는 만능 베이스<br>2. <b>봄베이 사파이어 (40%):</b> 토닉워터만 있으면 훌륭한 진토닉 완성<br>3. <b>짐 빔 화이트 (40%):</b> 가성비 최고 하이볼용 위스키<br>4. <b>깔루아 (16%) 또는 말리부 (21%):</b> 달콤한 칵테일용 리큐르`;
+    }
+
+    // 5. 기본 안내 답변
+    return `질문해 주신 <b>"${question}"</b>에 대해 아래처럼 물어보시면 바로 답변해 드릴 수 있어요! 😊<br><br>• <b>"내 술장으로 만들 수 있는 칵테일 추천해줘"</b><br>• <b>"사이트에 없는 특별한 술 추천해줘"</b><br>• <b>"앱솔루트 보드카 도수랑 특징 알려줘"</b><br>• <b>"달달하고 도수 낮은 술 추천해줘"</b>`;
+  }
+
+  // 질문 전송 처리 (내장 AI 또는 연결된 외부 Gemini API 호출)
+  async function handleUserQuestion(questionText) {
+    const trimmed = questionText.trim();
+    if (!trimmed) return;
+
+    appendChatMessage('user', trimmed);
+    aiUserInput.value = '';
+
+    const loadingMsg = appendChatMessage('bot', '⏳ 바텐더가 답변을 생각하고 있습니다...');
+
+    if (userGeminiApiKey) {
+      try {
+        const ownedList = Array.from(myCabinet.values()).map(i => `${i.name}(${i.abv})`).join(', ') || '없음';
+        const prompt = `당신은 친절한 홈바 전문 AI 바텐더입니다. 현재 사용자의 술장 보유 목록은 [${ownedList}]입니다. 한국어로 4~6줄 이내로 알기 쉽게 답변해주세요.\n\n사용자 질문: ${trimmed}`;
+
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(userGeminiApiKey)}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        });
+        const data = await res.json();
+        const aiText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (aiText) {
+          loadingMsg.querySelector('.ai-bubble').innerHTML = aiText.replace(/\n/g, '<br>');
+          aiChatBox.scrollTop = aiChatBox.scrollHeight;
+          return;
+        }
+      } catch (err) {
+        // API 오류 시 내장 AI로 자동 전환
+      }
+    }
+
+    setTimeout(() => {
+      const reply = generateBuiltInAIReply(trimmed);
+      loadingMsg.querySelector('.ai-bubble').innerHTML = reply;
+      aiChatBox.scrollTop = aiChatBox.scrollHeight;
+    }, 350);
+  }
+
+  aiChatForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    handleUserQuestion(aiUserInput.value);
+  });
+
+  // 빠른 질문 버튼 클릭 이벤트
+  document.querySelectorAll('.ai-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      handleUserQuestion(chip.dataset.q);
+    });
+  });
+
+  // AI가 추천한 '사이트 외 술'을 내 술장에 바로 등록하는 기능
+  aiChatBox.addEventListener('click', (e) => {
+    const btn = e.target.closest('.ai-add-custom-btn');
+    if (!btn) return;
+
+    const customId = btn.dataset.id;
+    if (myCabinet.has(customId)) {
+      showToast('이미 내 술장에 등록된 술입니다!');
+      return;
+    }
+
+    myCabinet.set(customId, {
+      id: customId,
+      name: btn.dataset.name,
+      abv: btn.dataset.abv,
+      desc: btn.dataset.desc,
+      categoryKey: 'custom',
+      fallbackImg: 'my whiskey.png',
+      img: 'my whiskey.png'
+    });
+
+    saveCabinetToStorage();
+    updateCabinetCount();
+    btn.textContent = '✔ 보유중';
+    btn.disabled = true;
+    showToast(`✅ '${btn.dataset.name}'이(가) 내 술장에 직접 등록되었습니다!`);
+  });
+  // 초기 화면 로딩 시 개수 반영
+  updateCabinetCount();
+</script>
+  feature/core-logic
 </body>
 </html>
