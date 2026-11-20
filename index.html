@@ -671,15 +671,7 @@
     showToast('🚪 로그아웃되었습니다.');
   });
 
-  // 새로고침 시 기존 로그인 세션 복원
-  (function restoreSession() {
-    const savedId = localStorage.getItem('myHomebarCurrentUserId');
-    const users = getUsersDB();
-    if (savedId && users[savedId]) {
-      applyLoginSession(users[savedId]);
-    }
-  })();
-
+ 
   // DOM 요소 가져오기
   const categoryCards = document.querySelectorAll('#category-grid .ingredient-card');
   const subSection = document.getElementById('sub-liquor-section');
@@ -1144,6 +1136,17 @@
   });
   // 초기 화면 로딩 시 개수 반영
   updateCabinetCount();
+
+ // 새로고침 시 기존 로그인 세션 복원
+  (function restoreSession() {
+    const savedId = localStorage.getItem('myHomebarCurrentUserId');
+    const users = getUsersDB();
+    if (savedId && users[savedId]) {
+      applyLoginSession(users[savedId]);
+    }
+  })();
+
+
 </script>
 </body>
 </html>
