@@ -1,5 +1,5 @@
 # My Homebar
-
+https://ddogry.github.io/my-homebar/
 ## 프로젝트 소개
 My Homebar는 웹 기반 홈바 프로젝트입니다.
 
