@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 1. 검색창 이벤트 리스너
     document.getElementById("searchInput").addEventListener("input", (e) => {
-        searchQuery = e.target.value.toLowerCase().trim();
+        searchQuery = e.target.value.trim();
         filterAndRender();
     });
 
@@ -86,9 +86,12 @@ function initIngredientCheckboxes() {
 function filterAndRender() {
     let filtered = allRecipes.filter(recipe => {
         const matchCategory = (selectedCategory === "All") || (recipe.category === selectedCategory);
-        const matchSearch = recipe.name.toLowerCase().includes(searchQuery) || 
-                            recipe.koreanName.includes(searchQuery) ||
-                            recipe.ingredients.some(ing => ing.toLowerCase().includes(searchQuery));
+        
+        const query = searchQuery.toLowerCase();
+        const matchSearch = (recipe.name && recipe.name.toLowerCase().includes(query)) || 
+                            (recipe.koreanName && recipe.koreanName.toLowerCase().includes(query)) ||
+                            (recipe.description && recipe.description.toLowerCase().includes(query)) ||
+                            recipe.ingredients.some(ing => ing.toLowerCase().includes(query));
 
         let matchIngredients = true;
         if (ownedIngredients.size > 0) {
