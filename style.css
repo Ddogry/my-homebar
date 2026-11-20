@@ -32,3 +32,97 @@ body { font-family: 'Apple SD Gothic Neo', sans-serif; background-color: #121212
   .main-container { flex-direction: column; }
   .sidebar { width: 100%; }
 }
+/* 모달 배경 (어두운 반투명) */
+.modal {
+    display: none; /* 기본은 숨김 */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.75);
+    justify-content: center;
+    align-items: center;
+}
+
+/* 모달 창 본문 */
+.modal-content {
+    background-color: #1e1e1e;
+    color: #fff;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 85vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-content img {
+    width: 100%;
+    height: 240px;
+    object-fit: cover;
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.modal-body h2 {
+    margin: 8px 0 12px;
+    font-size: 1.6rem;
+}
+
+.modal-body h4 {
+    margin: 20px 0 10px;
+    color: #ff9f43;
+    font-size: 1.1rem;
+}
+
+/* 레시피 줄바꿈(\n) 유지 */
+.recipe-steps {
+    white-space: pre-line;
+    line-height: 1.7;
+    background-color: #2a2a2a;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+}
+
+/* 닫기(X) 버튼 */
+.close-btn {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.5);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 34px;
+    cursor: pointer;
+}
+
+.close-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* 카드에 마우스 올렸을 때 클릭 가능 표시 */
+.recipe-card {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.recipe-card:hover {
+    transform: translateY(-5px);
+}

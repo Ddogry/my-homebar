@@ -46,4 +46,22 @@
 
     <script src="script.js"></script>
 </body>
+<!-- 칵테일 상세 정보 모달 -->
+<div id="recipeModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" id="closeModalBtn">&times;</span>
+        <img id="modalImage" src="" alt="칵테일 이미지">
+        <div class="modal-body">
+            <span id="modalCategory" class="category-tag"></span>
+            <h2 id="modalTitle"></h2>
+            <p id="modalDesc" class="desc"></p>
+            
+            <h4>🍹 필요 재료</h4>
+            <div id="modalIngredients" class="ingredients-tags"></div>
+            
+            <h4>📝 만드는 법 (Recipe)</h4>
+            <p id="modalRecipe" class="recipe-steps"></p>
+        </div>
+    </div>
+</div>
 </html>
