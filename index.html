@@ -761,8 +761,8 @@
     const pw = document.getElementById('signup-pw').value.trim();
 
     const users = getUsersDB();
-    if (users[id]) {
-      signupErrorEl.textContent = '⚠️ 이미 사용 중인 아이디입니다.';
+    if (id === '관리자' || users[id]) {
+      signupErrorEl.textContent = '⚠️ 이미 사용 중이거나 사용할 수 없는 아이디입니다.';
       signupErrorEl.classList.remove('hidden');
       return;
     }
@@ -779,14 +779,13 @@
     showToast(`🎉 환영합니다, ${nickname}님! 회원가입이 완료되었습니다.`);
   });
 
-// 로그인 처리
+  // 로그인 처리
   loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const id = document.getElementById('login-id').value.trim();
     const pw = document.getElementById('login-pw').value.trim();
 
     const users = getUsersDB();
-    // 관리자 계정이 DB에 없으면 로그인 시 즉시 생성
     if (id === '관리자' && pw === 'a1234567') {
       const prev = users['관리자'] || {};
       users['관리자'] = {
@@ -845,13 +844,27 @@
     profileDropdownCard.classList.add('hidden');
     updateProfileCardUI();
 
+    const adminMode = isAdmin();
+    const adminHeaderBadge = document.getElementById('admin-header-badge');
+    const tabAdminBtn = document.getElementById('tab-admin');
+    const adminLiqPanel = document.getElementById('admin-liquor-panel');
+    if (adminHeaderBadge) adminHeaderBadge.classList.toggle('hidden', !adminMode);
+    if (tabAdminBtn) tabAdminBtn.classList.toggle('hidden', !adminMode);
+    if (adminLiqPanel) adminLiqPanel.classList.toggle('hidden', !adminMode);
+    renderGlobalNotice();
+
     if (typeof updateCabinetCount === 'function') updateCabinetCount();
     if (typeof renderCartList === 'function') renderCartList();
     if (typeof renderMyCabinet === 'function') renderMyCabinet();
-   if (typeof seedDemoRequestForUser === 'function') seedDemoRequestForUser(user.id);
+    if (typeof seedDemoRequestForUser === 'function') seedDemoRequestForUser(user.id);
     if (typeof updateFriendsBadge === 'function') updateFriendsBadge();
     if (typeof renderFriendsView === 'function') renderFriendsView();
     if (typeof renderFeedView === 'function') renderFeedView();
+
+    const activeCat = document.querySelector('#category-grid .ingredient-card.active');
+    if (activeCat && typeof renderSubLiquors === 'function') {
+      renderSubLiquors(activeCat.dataset.category);
+    }
   }
 
   profileTriggerBtn.addEventListener('click', (e) => {
@@ -889,6 +902,8 @@
     selectedFriendId = null;
     myCabinet.clear();
     cartLiquors.clear();
+    switchTab('view-browse');
+    renderGlobalNotice();
     profileDropdownCard.classList.add('hidden');
     profileWrapper.classList.add('hidden');
     authScreen.classList.remove('hidden');
@@ -922,7 +937,7 @@
     }, 2500);
   }
 
-  // 상단 탭 전환 기능 ('술 고르기' / '내 술장' / '친구 술장' / 'AI 바텐더')
+  // 상단 탭 전환 기능
   const tabButtons = document.querySelectorAll('.nav-tab-btn');
   const tabViews = document.querySelectorAll('.tab-view');
 
@@ -941,6 +956,9 @@
     }
     if (targetId === 'view-feed') {
       renderFeedView();
+    }
+    if (targetId === 'view-admin') {
+      renderAdminDashboard();
     }
   }
 
@@ -961,7 +979,7 @@
     });
   });
 
-  // 세부 술 20종 목록 그리기
+  // 세부 술 목록 그리기
   function renderSubLiquors(categoryKey) {
     const data = liquorData[categoryKey];
     if (!data) return;
@@ -1007,6 +1025,18 @@
         renderCartList();
       });
 
+      if (isAdmin()) {
+        const adminDelBtn = document.createElement('button');
+        adminDelBtn.type = 'button';
+        adminDelBtn.className = 'admin-del-liquor-btn';
+        adminDelBtn.textContent = '🗑️ 목록에서 제거';
+        adminDelBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          deleteCatalogLiquor(categoryKey, item.id, item.name);
+        });
+        itemCard.appendChild(adminDelBtn);
+      }
+
       subGrid.appendChild(itemCard);
     });
 
@@ -1048,7 +1078,7 @@
     if (activeCard) renderSubLiquors(activeCard.dataset.category);
   });
 
-  // 핵심: '내 술장으로 옮기기' 버튼 클릭 시 확정 이동
+  // '내 술장으로 옮기기' 버튼 클릭 시 확정 이동
   moveToCabinetBtn.addEventListener('click', () => {
     if (cartLiquors.size === 0) return;
 
@@ -1117,7 +1147,6 @@
   }
 
   // ==========================================
- // ==========================================
   // [탭 3] 친구 요청/수락 & 친구 술장 구경하기 시스템
   // ==========================================
   const friendsBadgeEl = document.getElementById('friends-badge');
@@ -1205,9 +1234,8 @@
     seedDemoPosts();
   }
 
-  // 처음 접속 시 바로 '수락' 버튼을 테스트해 볼 수 있도록 예시 친구 요청 1건 생성
   function seedDemoRequestForUser(userId) {
-    if (!userId || userId === 'bartender_kim') return;
+    if (!userId || userId === 'bartender_kim' || userId === ADMIN_ID) return;
     const flagKey = `myHomebarDemoReqSeeded_${userId}`;
     if (localStorage.getItem(flagKey)) return;
 
@@ -1274,7 +1302,6 @@
     friendAddMsgEl.classList.add(isError ? 'error' : 'success');
   }
 
-  // 친구 요청 보내기 (상대방이 수락해야 친구 성립)
   function sendFriendRequest(rawId) {
     if (!currentUser) return;
     const targetId = rawId.trim();
@@ -1298,7 +1325,6 @@
       return;
     }
 
-    // 상대방이 이미 나에게 요청을 보낸 상태라면 즉시 수락 처리
     const myIncoming = getIncomingRequests(currentUser.id);
     if (myIncoming.some(r => r.fromId === targetId)) {
       acceptFriendRequest(targetId);
@@ -1307,7 +1333,6 @@
       return;
     }
 
-    // 상대방의 받은 요청 목록 확인
     const targetIncoming = getIncomingRequests(targetId);
     if (targetIncoming.some(r => r.fromId === currentUser.id)) {
       showFriendMessage(`⏳ '${targetUser.nickname}(@${targetId})'님에게 이미 친구 요청을 보냈습니다. 수락을 기다려 주세요!`, true);
@@ -1326,24 +1351,20 @@
     renderFriendsView();
   }
 
-  // 받은 친구 요청 수락 (양쪽 친구 목록에 동시 등록)
   function acceptFriendRequest(fromId) {
     if (!currentUser) return;
     const users = getUsersDB();
     const sender = users[fromId];
 
-    // 1. 내 받은 요청에서 제거
     const updatedIncoming = getIncomingRequests(currentUser.id).filter(r => r.fromId !== fromId);
     saveIncomingRequests(currentUser.id, updatedIncoming);
 
-    // 2. 내 친구 목록에 추가
     const myFriends = getFriendIdsByUser(currentUser.id);
     if (!myFriends.includes(fromId)) {
       myFriends.push(fromId);
       saveFriendIdsByUser(currentUser.id, myFriends);
     }
 
-    // 3. 상대방 친구 목록에도 나 추가
     const theirFriends = getFriendIdsByUser(fromId);
     if (!theirFriends.includes(currentUser.id)) {
       theirFriends.push(currentUser.id);
@@ -1355,7 +1376,6 @@
     if (typeof renderFeedView === 'function') renderFeedView();
   }
 
-  // 받은 친구 요청 거절
   function rejectFriendRequest(fromId) {
     if (!currentUser) return;
     const updatedIncoming = getIncomingRequests(currentUser.id).filter(r => r.fromId !== fromId);
@@ -1369,7 +1389,6 @@
     sendFriendRequest(friendSearchInput.value);
   });
 
-  // 받은 친구 요청 목록 렌더링
   function renderIncomingRequests() {
     if (!currentUser) return;
     const users = getUsersDB();
@@ -1410,7 +1429,6 @@
     });
   }
 
-  // 요청 가능한 회원 칩 렌더링
   function renderSuggestedFriends() {
     if (!currentUser) return;
     const users = getUsersDB();
@@ -1437,7 +1455,6 @@
     });
   }
 
-  // 내 친구 목록 카드 렌더링
   function renderFriendsView() {
     updateFriendsBadge();
     renderIncomingRequests();
@@ -1512,7 +1529,6 @@
     }
   }
 
-  // 특정 친구의 술장 상세 열기
   function openFriendCabinet(friendId, shouldScroll = true) {
     const users = getUsersDB();
     const friend = users[friendId];
@@ -1600,7 +1616,7 @@
   });
 
   // ==========================================
-  // [탭 4] 오늘 마신 술 (인스타 피드 + 좋아요 + 댓글)
+  // [탭 4] 오늘 마신 술 (인스타 피드 + 좋아요 + 댓글 + 관리자 삭제)
   // ==========================================
   const feedBadgeEl = document.getElementById('feed-badge');
   const feedPostForm = document.getElementById('feed-post-form');
@@ -1625,7 +1641,6 @@
     localStorage.setItem('myHomebarPosts', JSON.stringify(posts));
   }
 
-  // 사진 미첨부 시 자동으로 감성 술 카드 이미지 생성
   function createDrinkPostImage(liquorName) {
     const canvas = document.createElement('canvas');
     canvas.width = 600;
@@ -1655,7 +1670,6 @@
     return canvas.toDataURL('image/jpeg', 0.85);
   }
 
-  // 게시물 사진 비율 유지 리사이징
   function resizePostPhotoFile(file) {
     return new Promise((resolve) => {
       const reader = new FileReader();
@@ -1686,7 +1700,6 @@
     });
   }
 
-  // 예시 친구들의 초기 게시물 생성
   function seedDemoPosts() {
     if (localStorage.getItem('myHomebarPostsSeeded')) return;
     const existing = getPostsDB();
@@ -1728,7 +1741,6 @@
     feedPhotoPreview.classList.remove('hidden');
   });
 
-  // 내 술장 선택 드롭다운 채우기
   function updateFeedCabinetPicker() {
     if (!feedCabinetPicker) return;
     feedCabinetPicker.innerHTML = '<option value="">🗄️ 내 술장에서 선택</option>';
@@ -1746,7 +1758,6 @@
     }
   });
 
-  // 새 게시글 올리기
   feedPostForm.addEventListener('submit', (e) => {
     e.preventDefault();
     if (!currentUser) return;
@@ -1779,15 +1790,15 @@
     showToast('📸 오늘 마신 술 게시물이 등록되었습니다!');
   });
 
-  // 피드 화면 렌더링 (나 + 수락된 친구들의 게시물만 표시)
   function renderFeedView() {
     if (!currentUser) return;
     updateFeedCabinetPicker();
 
     const users = getUsersDB();
+    const adminMode = isAdmin();
     const visibleAuthors = new Set([currentUser.id, ...getMyFriendIds()]);
     const allPosts = getPostsDB();
-    const feedPosts = allPosts.filter(p => visibleAuthors.has(p.authorId));
+    const feedPosts = adminMode ? allPosts : allPosts.filter(p => visibleAuthors.has(p.authorId));
 
     if (feedBadgeEl) feedBadgeEl.textContent = feedPosts.length;
     feedPostsListEl.innerHTML = '';
@@ -1819,7 +1830,7 @@
 
       const commentsHtml = comments.map(c => {
         const cUser = users[c.authorId] || { nickname: c.authorId };
-        const canDelComment = c.authorId === currentUser.id || isMyPost;
+        const canDelComment = c.authorId === currentUser.id || isMyPost || adminMode;
         return `
           <div class="insta-comment-row">
             <div class="insta-comment-body">
@@ -1843,7 +1854,7 @@
               <span>@${escapeHTML(author.id)} · ${escapeHTML(post.createdAt)}</span>
             </div>
           </div>
-          ${isMyPost ? `<button type="button" class="insta-delete-post-btn">🗑️ 삭제</button>` : ''}
+          ${(isMyPost || adminMode) ? `<button type="button" class="insta-delete-post-btn">${adminMode && !isMyPost ? '🛡️ 관리자 삭제' : '🗑️ 삭제'}</button>` : ''}
         </div>
 
         <div class="insta-post-img-wrap">
@@ -1873,7 +1884,6 @@
         </div>
       `;
 
-      // 좋아요 토글
       card.querySelector('.insta-like-btn').addEventListener('click', () => {
         const latestPosts = getPostsDB();
         const target = latestPosts.find(p => p.id === post.id);
@@ -1888,7 +1898,6 @@
         renderFeedView();
       });
 
-      // 댓글 등록
       card.querySelector('.insta-comment-form').addEventListener('submit', (e) => {
         e.preventDefault();
         const input = e.target.querySelector('input');
@@ -1911,7 +1920,6 @@
         renderFeedView();
       });
 
-      // 댓글 삭제
       card.querySelectorAll('.insta-del-comment-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const cid = btn.dataset.cid;
@@ -1921,17 +1929,17 @@
           target.comments = (target.comments || []).filter(c => c.id !== cid);
           savePostsDB(latestPosts);
           renderFeedView();
+          showToast('🗑️ 댓글이 삭제되었습니다.');
         });
       });
 
-      // 본인 게시물 삭제
       const delPostBtn = card.querySelector('.insta-delete-post-btn');
       if (delPostBtn) {
         delPostBtn.addEventListener('click', () => {
           const updated = getPostsDB().filter(p => p.id !== post.id);
           savePostsDB(updated);
           renderFeedView();
-          showToast('🗑️ 게시물이 삭제되었습니다.');
+          showToast(adminMode && !isMyPost ? '🛡️ 관리자 권한으로 게시물을 내렸습니다.' : '🗑️ 게시물이 삭제되었습니다.');
         });
       }
 
@@ -1940,7 +1948,7 @@
   }
 
   // ==========================================
-  // [탭 4] AI 바텐더 + 사이트 외 술 추천 & 바로 담기
+  // [탭 5] AI 바텐더 + 사이트 외 술 추천 & 바로 담기
   // ==========================================
   const aiChatBox = document.getElementById('ai-chat-box');
   const aiChatForm = document.getElementById('ai-chat-form');
@@ -1950,7 +1958,6 @@
   const geminiKeyInput = document.getElementById('gemini-api-key-input');
   const saveApiKeyBtn = document.getElementById('save-api-key-btn');
 
-  // 선택 사항: 개인 Gemini API 키 불러오기 (브라우저에만 저장되어 GitHub에 유출되지 않음)
   let userGeminiApiKey = localStorage.getItem('homebar_gemini_key') || '';
   if (userGeminiApiKey) {
     geminiKeyInput.value = userGeminiApiKey;
@@ -1969,7 +1976,6 @@
     showToast(userGeminiApiKey ? '✅ Gemini API 키가 브라우저에 저장되었습니다.' : 'API 키가 해제되었습니다.');
   });
 
-  // 채팅 말풍선 생성
   function appendChatMessage(sender, htmlText) {
     const msgDiv = document.createElement('div');
     msgDiv.className = `ai-msg ${sender}`;
@@ -1990,13 +1996,11 @@
     return msgDiv;
   }
 
-  // 통합 AI 답변 생성기 (사이트 외 술 추천 + 내 술장 연동 + 140종 검색)
   function generateBuiltInAIReply(question) {
     const q = question.toLowerCase().replace(/\s+/g, '');
     const ownedItems = Array.from(myCabinet.values());
     const ownedCats = new Set(ownedItems.map(i => i.categoryKey));
 
-    // 1. 사이트에 없는 술 추천 & 바로 내 술장에 담기
     if (q.includes('없는') || q.includes('외에') || q.includes('숨은') || q.includes('전통주') || q.includes('사케') || q.includes('와인') || q.includes('샴페인') || q.includes('피트') || q.includes('새로운')) {
       const hiddenLiquors = [
         { id: 'ext1', name: '화요 41 (증류식 소주)', abv: '41%', desc: '쌀 100% 감압 증류로 깔끔하고 토닉워터와 잘 어울리는 프리미엄 한국 증류주' },
@@ -2026,10 +2030,9 @@
         `;
       }).join('');
 
-      return `사이트 기본 목록(140종)에는 없지만 꼭 추천하고 싶은 <b>특별한 술 5가지</b>입니다! ✨<br>마음에 드는 술은 버튼을 눌러 <b>내 술장(기타 카테고리)</b>에 바로 등록할 수 있어요.<div class="ai-rec-list">${listHtml}</div>`;
+      return `사이트 기본 목록에는 없지만 꼭 추천하고 싶은 <b>특별한 술 5가지</b>입니다! ✨<br>마음에 드는 술은 버튼을 눌러 <b>내 술장(기타 카테고리)</b>에 바로 등록할 수 있어요.<div class="ai-rec-list">${listHtml}</div>`;
     }
 
-    // 2. 내 술장 기반 칵테일 추천
     if (q.includes('내술장') || q.includes('칵테일') || q.includes('만들수') || q.includes('레시피')) {
       if (ownedItems.length === 0) {
         return `현재 <b>내 술장이 비어 있어요!</b> 😅<br>먼저 <b>[🍾 술 고르기 & 담기]</b> 탭에서 집에 있는 술을 담아주시면, 그 술로 만들 수 있는 칵테일을 바로 추천해 드릴게요.`;
@@ -2073,7 +2076,6 @@
       return `현재 내 술장에 <b>[${ownedNames}]</b>(총 ${ownedItems.length}병)이 있네요! 🗄️<br><br>지금 바로 만들 수 있는 추천 칵테일입니다:<br>${recipes.slice(0, 5).join('<br>')}`;
     }
 
-    // 3. 140종 술 데이터에서 특정 술 이름 검색
     const allLiquors = [];
     Object.entries(liquorData).forEach(([catKey, catObj]) => {
       catObj.items.forEach(item => {
@@ -2092,7 +2094,6 @@
       return `<b>🍾 ${matchedLiquor.name}</b> (${matchedLiquor.catName})<br>• <b>도수:</b> ${matchedLiquor.abv}<br>• <b>특징:</b> ${matchedLiquor.desc}<br>• ${hasIt}`;
     }
 
-    // 4. 조건별 추천 (달달한 / 저도수 / 하이볼 / 입문)
     if (q.includes('달달') || q.includes('도수낮') || q.includes('저도수') || q.includes('순한')) {
       return `달콤하고 도수가 낮아 부담 없이 즐기기 좋은 인기 술 4가지입니다! 🍹<br><br>• <b>아페롤 (11%):</b> 상큼한 오렌지·허브 향의 가벼운 리큐르<br>• <b>깔루아 (16%):</b> 달콤한 커피 우유 맛 칵테일 필수템<br>• <b>베일리스 (17%):</b> 부드러운 생크림·초콜릿 풍미<br>• <b>말리부 (21%):</b> 주스나 콜라에 타기 좋은 달콤한 코코넛 럼`;
     }
@@ -2105,11 +2106,9 @@
       return `홈바를 처음 시작할 때 가장 활용도가 높은 <b>입문 필수 4병</b>을 추천해 드려요! 🔰<br><br>1. <b>앱솔루트 보드카 (40%):</b> 어떤 주스·탄산음료와도 잘 어울리는 만능 베이스<br>2. <b>봄베이 사파이어 (40%):</b> 토닉워터만 있으면 훌륭한 진토닉 완성<br>3. <b>짐 빔 화이트 (40%):</b> 가성비 최고 하이볼용 위스키<br>4. <b>깔루아 (16%) 또는 말리부 (21%):</b> 달콤한 칵테일용 리큐르`;
     }
 
-    // 5. 기본 안내 답변
     return `질문해 주신 <b>"${question}"</b>에 대해 아래처럼 물어보시면 바로 답변해 드릴 수 있어요! 😊<br><br>• <b>"내 술장으로 만들 수 있는 칵테일 추천해줘"</b><br>• <b>"사이트에 없는 특별한 술 추천해줘"</b><br>• <b>"앱솔루트 보드카 도수랑 특징 알려줘"</b><br>• <b>"달달하고 도수 낮은 술 추천해줘"</b>`;
   }
 
-  // 질문 전송 처리 (내장 AI 또는 연결된 외부 Gemini API 호출)
   async function handleUserQuestion(questionText) {
     const trimmed = questionText.trim();
     if (!trimmed) return;
@@ -2136,9 +2135,7 @@
           aiChatBox.scrollTop = aiChatBox.scrollHeight;
           return;
         }
-      } catch (err) {
-        // API 오류 시 내장 AI로 자동 전환
-      }
+      } catch (err) {}
     }
 
     setTimeout(() => {
@@ -2153,14 +2150,12 @@
     handleUserQuestion(aiUserInput.value);
   });
 
-  // 빠른 질문 버튼 클릭 이벤트
   document.querySelectorAll('.ai-chip').forEach(chip => {
     chip.addEventListener('click', () => {
       handleUserQuestion(chip.dataset.q);
     });
   });
 
-  // AI가 추천한 '사이트 외 술'을 내 술장에 바로 등록하는 기능
   aiChatBox.addEventListener('click', (e) => {
     const btn = e.target.closest('.ai-add-custom-btn');
     if (!btn) return;
@@ -2188,16 +2183,275 @@
     showToast(`✅ '${btn.dataset.name}'이(가) 내 술장에 직접 등록되었습니다!`);
   });
 
-  // 초기 예시 친구 생성 및 화면 로딩 시 개수 반영
+  // ==========================================
+  // [관리자 시스템] 계정 생성 · 술 카탈로그 관리 · 공지 · 회원 관리
+  // ==========================================
+  const ADMIN_ID = '관리자';
+  const ADMIN_PW = 'a1234567';
+
+  function isAdmin() {
+    return Boolean(currentUser && (currentUser.id === ADMIN_ID || currentUser.isAdmin));
+  }
+
+  const defaultLiquorSnapshot = JSON.parse(JSON.stringify(liquorData));
+
+  function ensureAdminAccount() {
+    const users = getUsersDB();
+    const prev = users[ADMIN_ID] || {};
+    users[ADMIN_ID] = {
+      id: ADMIN_ID,
+      pw: ADMIN_PW,
+      nickname: prev.nickname || '총괄 관리자',
+      avatar: prev.avatar || createDefaultAvatar('관'),
+      isAdmin: true,
+      banned: false
+    };
+    saveUsersDB(users);
+  }
+
+  function applySavedCatalogChanges() {
+    Object.keys(defaultLiquorSnapshot).forEach(key => {
+      liquorData[key].items = JSON.parse(JSON.stringify(defaultLiquorSnapshot[key].items));
+    });
+
+    let deletedIds = [];
+    let customItems = [];
+    try {
+      deletedIds = JSON.parse(localStorage.getItem('myHomebarDeletedLiquorIds') || '[]');
+      customItems = JSON.parse(localStorage.getItem('myHomebarCustomLiquors') || '[]');
+    } catch (e) {}
+
+    const deletedSet = new Set(deletedIds);
+    Object.keys(liquorData).forEach(key => {
+      liquorData[key].items = liquorData[key].items.filter(item => !deletedSet.has(item.id));
+    });
+
+    customItems.forEach(item => {
+      if (liquorData[item.categoryKey] && !deletedSet.has(item.id)) {
+        liquorData[item.categoryKey].items.unshift(item);
+      }
+    });
+  }
+
+  const adminAddLiquorForm = document.getElementById('admin-add-liquor-form');
+  const adminLiqImgInput = document.getElementById('admin-liq-img-input');
+  const adminLiqImgLabel = document.getElementById('admin-liq-img-label');
+  let pendingAdminLiqImg = '';
+
+  if (adminLiqImgInput) {
+    adminLiqImgInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      pendingAdminLiqImg = await resizeImageFile(file);
+      adminLiqImgLabel.textContent = '✅ 사진 선택됨';
+    });
+  }
+
+  if (adminAddLiquorForm) {
+    adminAddLiquorForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!isAdmin()) return;
+
+      const categoryKey = document.getElementById('admin-liq-category').value;
+      const name = document.getElementById('admin-liq-name').value.trim();
+      let abv = document.getElementById('admin-liq-abv').value.trim();
+      const desc = document.getElementById('admin-liq-desc').value.trim();
+      if (!name || !abv || !desc) return;
+      if (!abv.includes('%')) abv += '%';
+
+      const fallbackImg = liquorData[categoryKey]?.fallbackImg || 'my whiskey.png';
+      const newItem = {
+        id: 'adm_' + Date.now(),
+        categoryKey,
+        name,
+        abv,
+        desc,
+        img: pendingAdminLiqImg || fallbackImg,
+        fallbackImg
+      };
+
+      let customItems = [];
+      try {
+        customItems = JSON.parse(localStorage.getItem('myHomebarCustomLiquors') || '[]');
+      } catch (e) {}
+      customItems.push(newItem);
+      localStorage.setItem('myHomebarCustomLiquors', JSON.stringify(customItems));
+
+      applySavedCatalogChanges();
+      pendingAdminLiqImg = '';
+      adminAddLiquorForm.reset();
+      if (adminLiqImgLabel) adminLiqImgLabel.textContent = '📷 사진 선택 (선택)';
+
+      categoryCards.forEach(c => c.classList.toggle('active', c.dataset.category === categoryKey));
+      renderSubLiquors(categoryKey);
+      showToast(`🛡️ '${name}'이(가) ${categoryLabels[categoryKey]} 목록에 추가되었습니다!`);
+    });
+  }
+
+  function deleteCatalogLiquor(categoryKey, liquorId, liquorName) {
+    if (!isAdmin()) return;
+
+    let customItems = [];
+    let deletedIds = [];
+    try {
+      customItems = JSON.parse(localStorage.getItem('myHomebarCustomLiquors') || '[]');
+      deletedIds = JSON.parse(localStorage.getItem('myHomebarDeletedLiquorIds') || '[]');
+    } catch (e) {}
+
+    if (String(liquorId).startsWith('adm_')) {
+      customItems = customItems.filter(i => i.id !== liquorId);
+      localStorage.setItem('myHomebarCustomLiquors', JSON.stringify(customItems));
+    } else if (!deletedIds.includes(liquorId)) {
+      deletedIds.push(liquorId);
+      localStorage.setItem('myHomebarDeletedLiquorIds', JSON.stringify(deletedIds));
+    }
+
+    applySavedCatalogChanges();
+    renderSubLiquors(categoryKey);
+    showToast(`🗑️ '${liquorName}'을(를) 술 고르기 목록에서 제거했습니다.`);
+  }
+
+  function renderGlobalNotice() {
+    const banner = document.getElementById('global-notice-banner');
+    const textEl = document.getElementById('global-notice-text');
+    if (!banner || !textEl) return;
+
+    const notice = (localStorage.getItem('myHomebarGlobalNotice') || '').trim();
+    if (!notice || !currentUser) {
+      banner.classList.add('hidden');
+      return;
+    }
+    textEl.textContent = notice;
+    banner.classList.remove('hidden');
+  }
+
+  function renderAdminDashboard() {
+    if (!isAdmin()) return;
+
+    const users = getUsersDB();
+    const userList = Object.values(users);
+    const posts = getPostsDB();
+    const totalComments = posts.reduce((sum, p) => sum + (Array.isArray(p.comments) ? p.comments.length : 0), 0);
+    const totalLiquors = Object.values(liquorData).reduce((sum, cat) => sum + cat.items.length, 0);
+
+    document.getElementById('admin-stat-users').textContent = `${userList.length}명`;
+    document.getElementById('admin-stat-liquors').textContent = `${totalLiquors}종`;
+    document.getElementById('admin-stat-posts').textContent = `${posts.length}개`;
+    document.getElementById('admin-stat-comments').textContent = `${totalComments}개`;
+
+    const noticeInput = document.getElementById('admin-notice-input');
+    if (noticeInput) noticeInput.value = localStorage.getItem('myHomebarGlobalNotice') || '';
+
+    const usersListEl = document.getElementById('admin-users-list');
+    usersListEl.innerHTML = '';
+
+    userList.forEach(u => {
+      const isSelfAdmin = u.id === ADMIN_ID;
+      const cabCount = getUserCabinetById(u.id).length;
+      const postCount = posts.filter(p => p.authorId === u.id).length;
+
+      const row = document.createElement('div');
+      row.className = `admin-user-row ${u.banned ? 'banned' : ''}`;
+      row.innerHTML = `
+        <div class="admin-user-info">
+          <img src="${u.avatar || createDefaultAvatar(u.nickname)}" alt="${escapeHTML(u.nickname)}" class="friend-req-avatar" />
+          <div>
+            <strong>${escapeHTML(u.nickname)} ${isSelfAdmin ? '<span class="admin-role-badge">👑 관리자</span>' : ''} ${u.banned ? '<span class="banned-pill">정지됨</span>' : ''}</strong>
+            <span>@${escapeHTML(u.id)} · 술장 ${cabCount}병 · 게시글 ${postCount}개</span>
+          </div>
+        </div>
+        <div class="admin-user-actions">
+          ${isSelfAdmin ? '<span class="guide-text">보호된 계정</span>' : `
+            <button type="button" class="admin-ban-btn">${u.banned ? '✅ 정지 해제' : '🚫 계정 정지'}</button>
+            <button type="button" class="admin-del-user-btn">🗑️ 강제 탈퇴</button>
+          `}
+        </div>
+      `;
+
+      const banBtn = row.querySelector('.admin-ban-btn');
+      if (banBtn) {
+        banBtn.addEventListener('click', () => {
+          const latestUsers = getUsersDB();
+          if (!latestUsers[u.id]) return;
+          latestUsers[u.id].banned = !latestUsers[u.id].banned;
+          saveUsersDB(latestUsers);
+          renderAdminDashboard();
+          showToast(latestUsers[u.id].banned ? `🚫 '${u.nickname}' 계정을 정지했습니다.` : `✅ '${u.nickname}' 계정 정지를 해제했습니다.`);
+        });
+      }
+
+      const delBtn = row.querySelector('.admin-del-user-btn');
+      if (delBtn) {
+        delBtn.addEventListener('click', () => {
+          const latestUsers = getUsersDB();
+          delete latestUsers[u.id];
+          saveUsersDB(latestUsers);
+          localStorage.removeItem(`myHomebarCabinet_${u.id}`);
+          localStorage.removeItem(`myHomebarFriends_${u.id}`);
+          savePostsDB(getPostsDB().filter(p => p.authorId !== u.id));
+          renderAdminDashboard();
+          renderFeedView();
+          showToast(`🗑️ '${u.nickname}(@${u.id})' 회원을 강제 탈퇴 처리했습니다.`);
+        });
+      }
+
+      usersListEl.appendChild(row);
+    });
+  }
+
+  const adminNoticeForm = document.getElementById('admin-notice-form');
+  if (adminNoticeForm) {
+    adminNoticeForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!isAdmin()) return;
+      const text = document.getElementById('admin-notice-input').value.trim();
+      localStorage.setItem('myHomebarGlobalNotice', text);
+      renderGlobalNotice();
+      showToast(text ? '📢 전체 공지사항이 등록되었습니다!' : '공지사항이 비워졌습니다.');
+    });
+  }
+
+  const adminNoticeClearBtn = document.getElementById('admin-notice-clear-btn');
+  if (adminNoticeClearBtn) {
+    adminNoticeClearBtn.addEventListener('click', () => {
+      if (!isAdmin()) return;
+      localStorage.removeItem('myHomebarGlobalNotice');
+      document.getElementById('admin-notice-input').value = '';
+      renderGlobalNotice();
+      showToast('📢 상단 공지사항을 내렸습니다.');
+    });
+  }
+
+  const adminGoCatalogBtn = document.getElementById('admin-go-catalog-btn');
+  if (adminGoCatalogBtn) {
+    adminGoCatalogBtn.addEventListener('click', () => switchTab('view-browse'));
+  }
+
+  const adminResetCatalogBtn = document.getElementById('admin-reset-catalog-btn');
+  if (adminResetCatalogBtn) {
+    adminResetCatalogBtn.addEventListener('click', () => {
+      if (!isAdmin()) return;
+      localStorage.removeItem('myHomebarCustomLiquors');
+      localStorage.removeItem('myHomebarDeletedLiquorIds');
+      applySavedCatalogChanges();
+      renderAdminDashboard();
+      showToast('🔄 기본 술 140종 카탈로그가 원래대로 복구되었습니다.');
+    });
+  }
+
+  // 초기화 및 세션 복원
+  ensureAdminAccount();
+  applySavedCatalogChanges();
   seedDemoFriends();
   updateCabinetCount();
 
-  // 새로고침 시 기존 로그인 세션 복원
   (function restoreSession() {
     const savedId = localStorage.getItem('myHomebarCurrentUserId');
     const users = getUsersDB();
-    if (savedId && users[savedId]) {
+    if (savedId && users[savedId] && !users[savedId].banned) {
       applyLoginSession(users[savedId]);
+    } else {
+      localStorage.removeItem('myHomebarCurrentUserId');
     }
   })();
 </script>
