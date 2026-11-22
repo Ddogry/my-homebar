@@ -2141,3 +2141,177 @@ body.dark-mode .admin-user-row {
 .nav-tab-btn.hidden {
   display: none !important;
 }
+
+/* ==========================================
+   게스트 모드 & 잠금(🔒) UI 스타일
+   ========================================== */
+.guest-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 16px 0 12px;
+  color: #888;
+  font-size: 0.85rem;
+}
+.guest-divider::before,
+.guest-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #ddd;
+}
+.guest-divider span {
+  padding: 0 10px;
+}
+
+.guest-enter-btn {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px dashed #ff9800;
+  border-radius: 10px;
+  background: #fff8ee;
+  color: #d97706;
+  font-weight: 700;
+  font-size: 0.96rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.guest-enter-btn:hover {
+  background: #ff9800;
+  color: #fff;
+  border-style: solid;
+}
+
+.guest-sub-note {
+  margin: 8px 0 0;
+  font-size: 0.8rem;
+  color: #777;
+  text-align: center;
+}
+
+/* 상단 게스트 체험 배너 */
+.guest-mode-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: linear-gradient(90deg, #fff3cd, #ffe8a1);
+  border: 1px solid #f5c242;
+  color: #664d03;
+  padding: 10px 18px;
+  border-radius: 12px;
+  margin: 12px auto;
+  max-width: 1200px;
+  font-size: 0.9rem;
+}
+.guest-mode-banner.hidden {
+  display: none !important;
+}
+.guest-banner-btn {
+  background: #ff9800;
+  color: #fff;
+  border: none;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+.guest-banner-btn:hover {
+  background: #e68900;
+}
+
+/* 잠금 안내 카드 & 폼 잠금 */
+.guest-lock-box {
+  background: #f8f9fa;
+  border: 2px dashed #cbd5e1;
+  border-radius: 14px;
+  padding: 22px 18px;
+  text-align: center;
+  margin-bottom: 18px;
+  color: #475569;
+}
+.guest-lock-box h4 {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+  color: #1e293b;
+}
+.guest-lock-box p {
+  margin: 0 0 14px;
+  font-size: 0.9rem;
+}
+.guest-unlock-cta {
+  background: #ff9800;
+  color: #fff;
+  border: none;
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.guest-unlock-cta:hover {
+  background: #e68900;
+}
+
+.locked-section-dimmed {
+  opacity: 0.52;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* 피드 좋아요 / 댓글 잠금 */
+.insta-like-btn.locked-btn {
+  background: #f1f5f9 !important;
+  color: #94a3b8 !important;
+  border-color: #cbd5e1 !important;
+  cursor: not-allowed !important;
+}
+.insta-comment-form.locked-form input {
+  background: #f1f5f9;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+.insta-comment-form.locked-form button {
+  background: #cbd5e1 !important;
+  color: #64748b !important;
+  cursor: not-allowed !important;
+}
+
+/* 피드 검색 필터 바 */
+.feed-filter-bar {
+  margin-bottom: 16px;
+}
+.feed-filter-bar input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  box-sizing: border-box;
+}
+
+/* 다크모드 대응 */
+body.dark-mode .guest-enter-btn {
+  background: #2a2215;
+  color: #ffb74d;
+}
+body.dark-mode .guest-mode-banner {
+  background: linear-gradient(90deg, #332914, #3d3014);
+  border-color: #7c5e18;
+  color: #fde68a;
+}
+body.dark-mode .guest-lock-box {
+  background: #1e293b;
+  border-color: #475569;
+  color: #cbd5e1;
+}
+body.dark-mode .guest-lock-box h4 {
+  color: #f8fafc;
+}
+body.dark-mode .feed-filter-bar input {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}

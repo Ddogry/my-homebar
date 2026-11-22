@@ -44,6 +44,12 @@
         <p id="signup-error" class="auth-error hidden"></p>
         <button type="submit" class="auth-submit-btn signup-btn">회원가입 완료</button>
       </form>
+      <!-- 게스트 입장 영역 -->
+      <div class="guest-divider"><span>또는 로그인 없이 체험하기</span></div>
+      <button type="button" id="guest-login-btn" class="guest-enter-btn">
+        👀 게스트로 들어가기 (술장 담기 · 피드 구경)
+      </button>
+      <p class="guest-sub-note">※ 게스트는 친구 추가, 글쓰기, 좋아요·댓글 기능이 제한됩니다.</p>
     </div>
   </div>
   <!-- 다크모드 스위치 버튼 영역 -->
@@ -627,13 +633,18 @@
   };
 
   // ==========================================
-  // 로그인 / 회원가입 / 유튜브형 프로필 카드 시스템
+  // 로그인 / 회원가입 / 게스트 모드 / 프로필 카드 시스템
   // ==========================================
+  const GUEST_ID = '__guest__';
   const cartLiquors = new Map();
   const myCabinet = new Map();
   let currentUser = null;
 
-  // 기본 프로필 이미지 (사진 미등록 시 자동 생성)
+  function isGuest() {
+    return Boolean(currentUser && (currentUser.id === GUEST_ID || currentUser.isGuest));
+  }
+
+  // 기본 프로필 이미지
   function createDefaultAvatar(text = '🍸') {
     const letter = (Array.from((text || '🍸').trim())[0] || '🍸').toUpperCase();
     const canvas = document.createElement('canvas');
@@ -686,7 +697,7 @@
     localStorage.setItem('myHomebarUsers', JSON.stringify(users));
   }
 
-  // 현재 로그인한 계정의 술장 데이터 불러오기
+  // 현재 계정(또는 게스트)의 술장 데이터 불러오기
   function loadUserCabinet() {
     myCabinet.clear();
     cartLiquors.clear();
@@ -695,7 +706,7 @@
     const userKey = `myHomebarCabinet_${currentUser.id}`;
     let saved = localStorage.getItem(userKey);
 
-    if (!saved && localStorage.getItem('myHomebarCabinet')) {
+    if (!saved && !isGuest() && localStorage.getItem('myHomebarCabinet')) {
       saved = localStorage.getItem('myHomebarCabinet');
       localStorage.setItem(userKey, saved);
       localStorage.removeItem('myHomebarCabinet');
@@ -715,6 +726,45 @@
     if (cardCountEl) cardCountEl.textContent = myCabinet.size;
   }
 
+  // [추천 기능] 게스트 모드에서 담은 술장을 정식 계정에 자동 승계
+  function migrateGuestCabinetToUser(targetUserId) {
+    try {
+      const guestRaw = localStorage.getItem(`myHomebarCabinet_${GUEST_ID}`);
+      if (!guestRaw) return 0;
+      const guestItems = JSON.parse(guestRaw);
+      if (!Array.isArray(guestItems) || guestItems.length === 0) return 0;
+
+      const userKey = `myHomebarCabinet_${targetUserId}`;
+      const existing = JSON.parse(localStorage.getItem(userKey) || '[]');
+      const map = new Map(existing.map(i => [i.id, i]));
+      let addedCount = 0;
+
+      guestItems.forEach(item => {
+        if (!map.has(item.id)) {
+          map.set(item.id, item);
+          addedCount++;
+        }
+      });
+
+      localStorage.setItem(userKey, JSON.stringify(Array.from(map.values())));
+      localStorage.removeItem(`myHomebarCabinet_${GUEST_ID}`);
+      return addedCount;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  // 인증 화면으로 이동 (게스트 -> 회원 전환 포함)
+  function openAuthScreen(defaultTab = 'login') {
+    profileDropdownCard.classList.add('hidden');
+    authScreen.classList.remove('hidden');
+    if (defaultTab === 'signup') {
+      showSignupTab.click();
+    } else {
+      showLoginTab.click();
+    }
+  }
+
   // DOM 요소 연결
   const authScreen = document.getElementById('auth-screen');
   const showLoginTab = document.getElementById('show-login-tab');
@@ -723,6 +773,7 @@
   const signupForm = document.getElementById('signup-form');
   const loginErrorEl = document.getElementById('login-error');
   const signupErrorEl = document.getElementById('signup-error');
+  const guestLoginBtn = document.getElementById('guest-login-btn');
 
   const signupAvatarInput = document.getElementById('signup-avatar-input');
   const signupAvatarPreview = document.getElementById('signup-avatar-preview');
@@ -753,7 +804,21 @@
     signupErrorEl.classList.add('hidden');
   });
 
-  // 회원가입 처리
+  // 게스트로 들어가기 버튼 클릭
+  if (guestLoginBtn) {
+    guestLoginBtn.addEventListener('click', () => {
+      localStorage.setItem('myHomebarCurrentUserId', GUEST_ID);
+      applyLoginSession({
+        id: GUEST_ID,
+        nickname: '게스트 손님',
+        avatar: createDefaultAvatar('G'),
+        isGuest: true
+      });
+      showToast('👀 게스트로 입장했습니다! 술장 담기와 게시물 구경이 가능합니다.');
+    });
+  }
+
+  // 회원가입 처리 (+ 게스트 술장 자동 승계)
   signupForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const nickname = document.getElementById('signup-nickname').value.trim();
@@ -761,7 +826,7 @@
     const pw = document.getElementById('signup-pw').value.trim();
 
     const users = getUsersDB();
-    if (id === '관리자' || users[id]) {
+    if (id === '관리자' || id === GUEST_ID || users[id]) {
       signupErrorEl.textContent = '⚠️ 이미 사용 중이거나 사용할 수 없는 아이디입니다.';
       signupErrorEl.classList.remove('hidden');
       return;
@@ -771,15 +836,22 @@
     users[id] = { id, pw, nickname, avatar };
     saveUsersDB(users);
 
+    const migratedCount = migrateGuestCabinetToUser(id);
+
     localStorage.setItem('myHomebarCurrentUserId', id);
     pendingSignupAvatar = '';
     signupForm.reset();
     signupAvatarPreview.src = createDefaultAvatar('🍸');
     applyLoginSession(users[id]);
-    showToast(`🎉 환영합니다, ${nickname}님! 회원가입이 완료되었습니다.`);
+
+    if (migratedCount > 0) {
+      showToast(`🎉 환영합니다, ${nickname}님! 게스트로 담은 술 ${migratedCount}병도 내 술장으로 옮겼습니다!`);
+    } else {
+      showToast(`🎉 환영합니다, ${nickname}님! 회원가입이 완료되었습니다.`);
+    }
   });
 
-  // 로그인 처리
+  // 로그인 처리 (+ 게스트 술장 병합)
   loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const id = document.getElementById('login-id').value.trim();
@@ -811,12 +883,43 @@
       return;
     }
 
+    const migratedCount = migrateGuestCabinetToUser(id);
+
     localStorage.setItem('myHomebarCurrentUserId', id);
     loginForm.reset();
     loginErrorEl.classList.add('hidden');
     applyLoginSession(found);
-    showToast(found.isAdmin ? '👑 관리자 계정으로 로그인했습니다!' : `🍸 ${found.nickname}님, 어서 오세요!`);
+
+    if (found.isAdmin) {
+      showToast('👑 관리자 계정으로 로그인했습니다!');
+    } else if (migratedCount > 0) {
+      showToast(`🍸 ${found.nickname}님 환영합니다! 게스트로 담은 술 ${migratedCount}병을 내 술장에 합쳤습니다.`);
+    } else {
+      showToast(`🍸 ${found.nickname}님, 어서 오세요!`);
+    }
   });
+
+  // 상단 게스트 체험 안내 배너 동적 생성 및 제어
+  function renderGuestBanner() {
+    let banner = document.getElementById('guest-mode-banner');
+    if (!banner) {
+      banner = document.createElement('div');
+      banner.id = 'guest-mode-banner';
+      banner.className = 'guest-mode-banner hidden';
+      banner.innerHTML = `
+        <span>👀 현재 <b>게스트 체험 모드</b>입니다. 술장 담기·피드 열람은 가능하며, <b>친구 추가·글쓰기·좋아요·댓글</b>은 잠겨 있습니다(🔒).</span>
+        <button type="button" class="guest-banner-btn" id="guest-banner-signup-btn">🚀 회원가입하고 잠금 해제</button>
+      `;
+      const mainEl = document.querySelector('main') || document.body;
+      mainEl.insertBefore(banner, mainEl.firstChild);
+
+      banner.querySelector('#guest-banner-signup-btn').addEventListener('click', () => {
+        openAuthScreen('signup');
+      });
+    }
+
+    banner.classList.toggle('hidden', !isGuest());
+  }
 
   // 로그인 후 프로필 카드 반영
   const profileWrapper = document.getElementById('user-profile-wrapper');
@@ -827,13 +930,50 @@
 
   function updateProfileCardUI() {
     if (!currentUser) return;
+    const guestMode = isGuest();
     const avatarSrc = currentUser.avatar || createDefaultAvatar(currentUser.nickname);
     document.getElementById('header-avatar-img').src = avatarSrc;
-    document.getElementById('header-nickname-text').textContent = currentUser.nickname;
+    document.getElementById('header-nickname-text').textContent = guestMode ? '👀 게스트' : currentUser.nickname;
     document.getElementById('card-avatar-img').src = avatarSrc;
     document.getElementById('card-nickname-text').textContent = currentUser.nickname;
-    document.getElementById('card-userid-text').textContent = `@${currentUser.id}`;
+    document.getElementById('card-userid-text').textContent = guestMode ? '게스트 체험 모드 (일부 기능 제한)' : `@${currentUser.id}`;
     document.getElementById('card-cabinet-count').textContent = myCabinet.size;
+
+    const changeAvatarLabel = changeAvatarInput ? changeAvatarInput.closest('label') : null;
+    if (changeAvatarLabel) {
+      if (guestMode) {
+        changeAvatarLabel.style.opacity = '0.5';
+        changeAvatarLabel.style.pointerEvents = 'none';
+        changeAvatarLabel.title = '로그인 후 프로필 사진을 변경할 수 있습니다';
+      } else {
+        changeAvatarLabel.style.opacity = '';
+        changeAvatarLabel.style.pointerEvents = '';
+        changeAvatarLabel.title = '';
+      }
+    }
+
+    if (logoutBtn) {
+      logoutBtn.textContent = guestMode ? '🚀 로그인 / 회원가입하기' : '🚪 로그아웃';
+    }
+  }
+
+  // 게스트 모드 탭 잠금 표시 업데이트
+  function updateGuestTabLocks() {
+    const guestMode = isGuest();
+    const friendsTabBtn = document.querySelector('.nav-tab-btn[data-target="view-friends"]');
+    if (friendsTabBtn) {
+      let lockSpan = friendsTabBtn.querySelector('.tab-lock-icon');
+      if (guestMode) {
+        if (!lockSpan) {
+          lockSpan = document.createElement('span');
+          lockSpan.className = 'tab-lock-icon';
+          lockSpan.textContent = ' 🔒';
+          friendsTabBtn.appendChild(lockSpan);
+        }
+      } else if (lockSpan) {
+        lockSpan.remove();
+      }
+    }
   }
 
   function applyLoginSession(user) {
@@ -843,6 +983,8 @@
     profileWrapper.classList.remove('hidden');
     profileDropdownCard.classList.add('hidden');
     updateProfileCardUI();
+    updateGuestTabLocks();
+    renderGuestBanner();
 
     const adminMode = isAdmin();
     const adminHeaderBadge = document.getElementById('admin-header-badge');
@@ -856,7 +998,7 @@
     if (typeof updateCabinetCount === 'function') updateCabinetCount();
     if (typeof renderCartList === 'function') renderCartList();
     if (typeof renderMyCabinet === 'function') renderMyCabinet();
-    if (typeof seedDemoRequestForUser === 'function') seedDemoRequestForUser(user.id);
+    if (!isGuest() && typeof seedDemoRequestForUser === 'function') seedDemoRequestForUser(user.id);
     if (typeof updateFriendsBadge === 'function') updateFriendsBadge();
     if (typeof renderFriendsView === 'function') renderFriendsView();
     if (typeof renderFeedView === 'function') renderFeedView();
@@ -882,7 +1024,7 @@
   // 프로필 카드 안에서 사진 즉시 변경
   changeAvatarInput.addEventListener('change', async (e) => {
     const file = e.target.files[0];
-    if (!file || !currentUser) return;
+    if (!file || !currentUser || isGuest()) return;
     const newAvatar = await resizeImageFile(file);
     currentUser.avatar = newAvatar;
 
@@ -895,8 +1037,12 @@
     showToast('📸 프로필 사진이 변경되었습니다!');
   });
 
-  // 로그아웃 처리
+  // 로그아웃 (게스트일 때는 로그인/회원가입 화면 열기)
   logoutBtn.addEventListener('click', () => {
+    if (isGuest()) {
+      openAuthScreen('signup');
+      return;
+    }
     localStorage.removeItem('myHomebarCurrentUserId');
     currentUser = null;
     selectedFriendId = null;
@@ -904,6 +1050,7 @@
     cartLiquors.clear();
     switchTab('view-browse');
     renderGlobalNotice();
+    renderGuestBanner();
     profileDropdownCard.classList.add('hidden');
     profileWrapper.classList.add('hidden');
     authScreen.classList.remove('hidden');
@@ -934,7 +1081,7 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => {
       toastEl.classList.remove('show');
-    }, 2500);
+    }, 2600);
   }
 
   // 상단 탭 전환 기능
@@ -1147,8 +1294,9 @@
   }
 
   // ==========================================
-  // [탭 3] 친구 요청/수락 & 친구 술장 구경하기 시스템
+  // [탭 3] 친구 요청/수락 & 친구 술장 구경하기 (게스트 잠금 지원)
   // ==========================================
+  const viewFriendsEl = document.getElementById('view-friends');
   const friendsBadgeEl = document.getElementById('friends-badge');
   const friendsTotalCountEl = document.getElementById('friends-total-count');
   const friendRequestsBox = document.getElementById('friend-requests-box');
@@ -1235,7 +1383,7 @@
   }
 
   function seedDemoRequestForUser(userId) {
-    if (!userId || userId === 'bartender_kim' || userId === ADMIN_ID) return;
+    if (!userId || userId === 'bartender_kim' || userId === ADMIN_ID || userId === GUEST_ID) return;
     const flagKey = `myHomebarDemoReqSeeded_${userId}`;
     if (localStorage.getItem(flagKey)) return;
 
@@ -1249,6 +1397,7 @@
   }
 
   function getFriendIdsByUser(userId) {
+    if (!userId || userId === GUEST_ID) return [];
     try {
       return JSON.parse(localStorage.getItem(`myHomebarFriends_${userId}`) || '[]');
     } catch (e) {
@@ -1257,15 +1406,17 @@
   }
 
   function saveFriendIdsByUser(userId, friendIds) {
+    if (!userId || userId === GUEST_ID) return;
     localStorage.setItem(`myHomebarFriends_${userId}`, JSON.stringify(friendIds));
     if (currentUser && currentUser.id === userId) updateFriendsBadge();
   }
 
   function getMyFriendIds() {
-    return currentUser ? getFriendIdsByUser(currentUser.id) : [];
+    return currentUser && !isGuest() ? getFriendIdsByUser(currentUser.id) : [];
   }
 
   function getIncomingRequests(userId) {
+    if (!userId || userId === GUEST_ID) return [];
     try {
       return JSON.parse(localStorage.getItem(`myHomebarFriendRequests_${userId}`) || '[]');
     } catch (e) {
@@ -1274,6 +1425,7 @@
   }
 
   function saveIncomingRequests(userId, reqList) {
+    if (!userId || userId === GUEST_ID) return;
     localStorage.setItem(`myHomebarFriendRequests_${userId}`, JSON.stringify(reqList));
     if (currentUser && currentUser.id === userId) updateFriendsBadge();
   }
@@ -1288,6 +1440,11 @@
 
   function updateFriendsBadge() {
     if (!currentUser) return;
+    if (isGuest()) {
+      if (friendsBadgeEl) friendsBadgeEl.textContent = '🔒';
+      if (friendsTotalCountEl) friendsTotalCountEl.textContent = '0';
+      return;
+    }
     const friendCount = getMyFriendIds().length;
     const reqCount = getIncomingRequests(currentUser.id).length;
     if (friendsBadgeEl) {
@@ -1303,7 +1460,10 @@
   }
 
   function sendFriendRequest(rawId) {
-    if (!currentUser) return;
+    if (!currentUser || isGuest()) {
+      showToast('🔒 게스트 모드에서는 친구 추가 기능을 사용할 수 없습니다.');
+      return;
+    }
     const targetId = rawId.trim();
     if (!targetId) return;
 
@@ -1352,7 +1512,7 @@
   }
 
   function acceptFriendRequest(fromId) {
-    if (!currentUser) return;
+    if (!currentUser || isGuest()) return;
     const users = getUsersDB();
     const sender = users[fromId];
 
@@ -1377,7 +1537,7 @@
   }
 
   function rejectFriendRequest(fromId) {
-    if (!currentUser) return;
+    if (!currentUser || isGuest()) return;
     const updatedIncoming = getIncomingRequests(currentUser.id).filter(r => r.fromId !== fromId);
     saveIncomingRequests(currentUser.id, updatedIncoming);
     showToast('친구 요청을 거절했습니다.');
@@ -1390,7 +1550,10 @@
   });
 
   function renderIncomingRequests() {
-    if (!currentUser) return;
+    if (!currentUser || isGuest()) {
+      friendRequestsBox.classList.add('hidden');
+      return;
+    }
     const users = getUsersDB();
     const requests = getIncomingRequests(currentUser.id);
 
@@ -1430,7 +1593,10 @@
   }
 
   function renderSuggestedFriends() {
-    if (!currentUser) return;
+    if (!currentUser || isGuest()) {
+      friendSuggestListEl.innerHTML = '';
+      return;
+    }
     const users = getUsersDB();
     const myFriends = new Set(getMyFriendIds());
     const candidates = Object.values(users).filter(u => u.id !== currentUser.id && !myFriends.has(u.id));
@@ -1457,6 +1623,57 @@
 
   function renderFriendsView() {
     updateFriendsBadge();
+    const guestMode = isGuest();
+
+    // 게스트 잠금 안내 카드 제어
+    let lockBanner = document.getElementById('friends-guest-lock-box');
+    if (guestMode) {
+      if (!lockBanner && viewFriendsEl) {
+        lockBanner = document.createElement('div');
+        lockBanner.id = 'friends-guest-lock-box';
+        lockBanner.className = 'guest-lock-box';
+        lockBanner.innerHTML = `
+          <h4>🔒 친구 추가 및 친구 술장 구경은 회원 전용 기능입니다</h4>
+          <p>게스트 모드에서는 친구 요청을 보내거나 친구 목록을 이용할 수 없습니다.<br>회원가입 후 다른 바텐더들과 술장을 공유해 보세요!</p>
+          <button type="button" class="guest-unlock-cta" id="friends-unlock-btn">🚀 회원가입 / 로그인하고 잠금 해제</button>
+        `;
+        viewFriendsEl.insertBefore(lockBanner, viewFriendsEl.firstChild);
+        lockBanner.querySelector('#friends-unlock-btn').addEventListener('click', () => openAuthScreen('signup'));
+      }
+      if (friendSearchInput) {
+        friendSearchInput.disabled = true;
+        friendSearchInput.placeholder = '🔒 로그인 후 친구 아이디 검색 가능';
+      }
+      const addSubmitBtn = friendAddForm ? friendAddForm.querySelector('button[type="submit"]') : null;
+      if (addSubmitBtn) {
+        addSubmitBtn.disabled = true;
+        addSubmitBtn.textContent = '🔒 잠김';
+      }
+      if (friendAddForm) friendAddForm.classList.add('locked-section-dimmed');
+      friendRequestsBox.classList.add('hidden');
+      friendSuggestListEl.innerHTML = '';
+      friendCabinetSection.classList.add('hidden');
+      friendsListGridEl.innerHTML = `
+        <div class="empty-cabinet-box">
+          <p>🔒 게스트 모드에서는 친구 목록이 잠겨 있습니다.</p>
+          <span>상단의 회원가입 버튼을 누르면 게스트로 담은 술장도 그대로 이어집니다!</span>
+        </div>
+      `;
+      return;
+    } else {
+      if (lockBanner) lockBanner.remove();
+      if (friendSearchInput) {
+        friendSearchInput.disabled = false;
+        friendSearchInput.placeholder = '친구 아이디 입력';
+      }
+      const addSubmitBtn = friendAddForm ? friendAddForm.querySelector('button[type="submit"]') : null;
+      if (addSubmitBtn) {
+        addSubmitBtn.disabled = false;
+        addSubmitBtn.textContent = '친구 요청 보내기';
+      }
+      if (friendAddForm) friendAddForm.classList.remove('locked-section-dimmed');
+    }
+
     renderIncomingRequests();
     renderSuggestedFriends();
 
@@ -1530,6 +1747,7 @@
   }
 
   function openFriendCabinet(friendId, shouldScroll = true) {
+    if (isGuest()) return;
     const users = getUsersDB();
     const friend = users[friendId];
     if (!friend) return;
@@ -1616,7 +1834,7 @@
   });
 
   // ==========================================
-  // [탭 4] 오늘 마신 술 (인스타 피드 + 좋아요 + 댓글 + 관리자 삭제)
+  // [탭 4] 오늘 마신 술 (게스트: 열람만 가능, 작성/좋아요/댓글 🔒 잠금)
   // ==========================================
   const feedBadgeEl = document.getElementById('feed-badge');
   const feedPostForm = document.getElementById('feed-post-form');
@@ -1628,6 +1846,7 @@
   const feedPostsListEl = document.getElementById('feed-posts-list');
 
   let pendingFeedPhoto = '';
+  let feedSearchKeyword = '';
 
   function getPostsDB() {
     try {
@@ -1735,7 +1954,7 @@
 
   feedPhotoInput.addEventListener('change', async (e) => {
     const file = e.target.files[0];
-    if (!file) return;
+    if (!file || isGuest()) return;
     pendingFeedPhoto = await resizePostPhotoFile(file);
     feedPhotoPreview.src = pendingFeedPhoto;
     feedPhotoPreview.classList.remove('hidden');
@@ -1760,7 +1979,10 @@
 
   feedPostForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    if (!currentUser) return;
+    if (!currentUser || isGuest()) {
+      showToast('🔒 게스트 모드에서는 게시글을 작성할 수 없습니다.');
+      return;
+    }
 
     const liquorName = feedLiquorNameInput.value.trim();
     const caption = feedCaptionInput.value.trim();
@@ -1790,15 +2012,67 @@
     showToast('📸 오늘 마신 술 게시물이 등록되었습니다!');
   });
 
+  function updateFeedGuestLockUI() {
+    const guestMode = isGuest();
+    let postLockBanner = document.getElementById('feed-post-guest-lock');
+
+    if (guestMode) {
+      if (!postLockBanner && feedPostForm && feedPostForm.parentNode) {
+        postLockBanner = document.createElement('div');
+        postLockBanner.id = 'feed-post-guest-lock';
+        postLockBanner.className = 'guest-lock-box';
+        postLockBanner.innerHTML = `
+          <h4>🔒 게시글 작성 · 좋아요 · 댓글은 로그인 후 이용할 수 있습니다</h4>
+          <p>게스트 모드에서는 다른 회원들이 올린 '오늘 마신 술' 게시물을 자유롭게 구경할 수 있어요!</p>
+          <button type="button" class="guest-unlock-cta" id="feed-unlock-btn">🚀 로그인 / 회원가입하기</button>
+        `;
+        feedPostForm.parentNode.insertBefore(postLockBanner, feedPostForm);
+        postLockBanner.querySelector('#feed-unlock-btn').addEventListener('click', () => openAuthScreen('signup'));
+      }
+      if (feedPostForm) feedPostForm.classList.add('hidden');
+    } else {
+      if (postLockBanner) postLockBanner.remove();
+      if (feedPostForm) feedPostForm.classList.remove('hidden');
+    }
+
+    // [추천 기능] 피드 검색 필터 바 보장
+    let filterBar = document.getElementById('feed-filter-bar');
+    if (!filterBar && feedPostsListEl && feedPostsListEl.parentNode) {
+      filterBar = document.createElement('div');
+      filterBar.id = 'feed-filter-bar';
+      filterBar.className = 'feed-filter-bar';
+      filterBar.innerHTML = `<input type="text" id="feed-search-input" placeholder="🔍 게시물 속 술 이름이나 내용 검색..." />`;
+      feedPostsListEl.parentNode.insertBefore(filterBar, feedPostsListEl);
+
+      filterBar.querySelector('#feed-search-input').addEventListener('input', (e) => {
+        feedSearchKeyword = e.target.value.trim().toLowerCase();
+        renderFeedView();
+      });
+    }
+  }
+
   function renderFeedView() {
     if (!currentUser) return;
+    updateFeedGuestLockUI();
     updateFeedCabinetPicker();
 
     const users = getUsersDB();
     const adminMode = isAdmin();
+    const guestMode = isGuest();
     const visibleAuthors = new Set([currentUser.id, ...getMyFriendIds()]);
     const allPosts = getPostsDB();
-    const feedPosts = adminMode ? allPosts : allPosts.filter(p => visibleAuthors.has(p.authorId));
+
+    // 게스트는 구경할 수 있도록 전체 피드 열람 허용
+    let feedPosts = (adminMode || guestMode)
+      ? allPosts
+      : allPosts.filter(p => visibleAuthors.has(p.authorId));
+
+    if (feedSearchKeyword) {
+      feedPosts = feedPosts.filter(p =>
+        (p.liquorName || '').toLowerCase().includes(feedSearchKeyword) ||
+        (p.caption || '').toLowerCase().includes(feedSearchKeyword)
+      );
+    }
 
     if (feedBadgeEl) feedBadgeEl.textContent = feedPosts.length;
     feedPostsListEl.innerHTML = '';
@@ -1806,8 +2080,8 @@
     if (feedPosts.length === 0) {
       feedPostsListEl.innerHTML = `
         <div class="empty-cabinet-box">
-          <p>아직 올라온 '오늘 마신 술' 게시물이 없습니다.</p>
-          <span>위에서 첫 게시물을 올리거나, 친구 요청을 수락해 친구의 술 기록을 구경해 보세요!</span>
+          <p>${feedSearchKeyword ? '검색어와 일치하는 게시물이 없습니다.' : "아직 올라온 '오늘 마신 술' 게시물이 없습니다."}</p>
+          <span>${guestMode ? '다른 키워드로 검색해 보거나 회원가입 후 첫 글을 남겨보세요!' : '위에서 첫 게시물을 올리거나, 친구 요청을 수락해 친구의 술 기록을 구경해 보세요!'}</span>
         </div>
       `;
       return;
@@ -1815,10 +2089,10 @@
 
     feedPosts.forEach(post => {
       const author = users[post.authorId] || { id: post.authorId, nickname: post.authorId };
-      const isMyPost = post.authorId === currentUser.id;
+      const isMyPost = !guestMode && post.authorId === currentUser.id;
       const likes = Array.isArray(post.likes) ? post.likes : [];
       const comments = Array.isArray(post.comments) ? post.comments : [];
-      const isLiked = likes.includes(currentUser.id);
+      const isLiked = !guestMode && likes.includes(currentUser.id);
 
       const likedNames = likes
         .map(uid => (users[uid] ? users[uid].nickname : uid))
@@ -1830,7 +2104,7 @@
 
       const commentsHtml = comments.map(c => {
         const cUser = users[c.authorId] || { nickname: c.authorId };
-        const canDelComment = c.authorId === currentUser.id || isMyPost || adminMode;
+        const canDelComment = !guestMode && (c.authorId === currentUser.id || isMyPost || adminMode);
         return `
           <div class="insta-comment-row">
             <div class="insta-comment-body">
@@ -1862,8 +2136,8 @@
         </div>
 
         <div class="insta-post-actions">
-          <button type="button" class="insta-like-btn ${isLiked ? 'liked' : ''}">
-            ${isLiked ? '❤️' : '🤍'} 좋아요 <b>${likes.length}</b>
+          <button type="button" class="insta-like-btn ${isLiked ? 'liked' : ''} ${guestMode ? 'locked-btn' : ''}" ${guestMode ? 'title="🔒 로그인 후 좋아요를 누를 수 있습니다"' : ''}>
+            ${guestMode ? '🔒' : (isLiked ? '❤️' : '🤍')} 좋아요 <b>${likes.length}</b>
           </button>
           <span class="insta-comment-count">💬 댓글 <b>${comments.length}</b>개</span>
         </div>
@@ -1877,14 +2151,18 @@
 
         <div class="insta-comments-section">
           ${commentsHtml}
-          <form class="insta-comment-form">
-            <input type="text" placeholder="댓글 달기..." required />
-            <button type="submit">게시</button>
+          <form class="insta-comment-form ${guestMode ? 'locked-form' : ''}">
+            <input type="text" placeholder="${guestMode ? '🔒 게스트는 댓글을 작성할 수 없습니다 (열람 전용)' : '댓글 달기...'}" ${guestMode ? 'disabled' : 'required'} />
+            <button type="submit" ${guestMode ? 'disabled' : ''}>${guestMode ? '🔒 잠김' : '게시'}</button>
           </form>
         </div>
       `;
 
       card.querySelector('.insta-like-btn').addEventListener('click', () => {
+        if (isGuest()) {
+          showToast('🔒 게스트 모드에서는 좋아요를 누를 수 없습니다. 로그인해 주세요!');
+          return;
+        }
         const latestPosts = getPostsDB();
         const target = latestPosts.find(p => p.id === post.id);
         if (!target) return;
@@ -1900,6 +2178,10 @@
 
       card.querySelector('.insta-comment-form').addEventListener('submit', (e) => {
         e.preventDefault();
+        if (isGuest()) {
+          showToast('🔒 게스트 모드에서는 댓글을 작성할 수 없습니다.');
+          return;
+        }
         const input = e.target.querySelector('input');
         const text = input.value.trim();
         if (!text) return;
@@ -1922,6 +2204,7 @@
 
       card.querySelectorAll('.insta-del-comment-btn').forEach(btn => {
         btn.addEventListener('click', () => {
+          if (isGuest()) return;
           const cid = btn.dataset.cid;
           const latestPosts = getPostsDB();
           const target = latestPosts.find(p => p.id === post.id);
@@ -1936,6 +2219,7 @@
       const delPostBtn = card.querySelector('.insta-delete-post-btn');
       if (delPostBtn) {
         delPostBtn.addEventListener('click', () => {
+          if (isGuest()) return;
           const updated = getPostsDB().filter(p => p.id !== post.id);
           savePostsDB(updated);
           renderFeedView();
@@ -2190,7 +2474,7 @@
   const ADMIN_PW = 'a1234567';
 
   function isAdmin() {
-    return Boolean(currentUser && (currentUser.id === ADMIN_ID || currentUser.isAdmin));
+    return Boolean(currentUser && !isGuest() && (currentUser.id === ADMIN_ID || currentUser.isAdmin));
   }
 
   const defaultLiquorSnapshot = JSON.parse(JSON.stringify(liquorData));
@@ -2439,7 +2723,7 @@
     });
   }
 
-  // 초기화 및 세션 복원
+  // 초기화 및 세션 복원 (게스트 세션 복원 포함)
   ensureAdminAccount();
   applySavedCatalogChanges();
   seedDemoFriends();
@@ -2447,6 +2731,15 @@
 
   (function restoreSession() {
     const savedId = localStorage.getItem('myHomebarCurrentUserId');
+    if (savedId === GUEST_ID) {
+      applyLoginSession({
+        id: GUEST_ID,
+        nickname: '게스트 손님',
+        avatar: createDefaultAvatar('G'),
+        isGuest: true
+      });
+      return;
+    }
     const users = getUsersDB();
     if (savedId && users[savedId] && !users[savedId].banned) {
       applyLoginSession(users[savedId]);
