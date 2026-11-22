@@ -2816,5 +2816,1047 @@
     }
   })();
 </script>
+<style id="admin-recovery-styles">
+  /* 삭제 직후 실행 취소(Undo) 플로팅 토스트 */
+  .admin-undo-toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #1e293b;
+    color: #f8fafc;
+    padding: 12px 18px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.28);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    z-index: 9999;
+    font-size: 0.92rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.25s ease;
+    border: 1px solid #475569;
+  }
+  .admin-undo-toast.show {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+  }
+  .admin-undo-btn {
+    background: #ff9800;
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+  .admin-undo-btn:hover {
+    background: #e68900;
+  }
+
+  /* 술 고르기 화면 관리자 빠른 복구 바 */
+  .admin-quick-recovery-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed #cbd5e1;
+  }
+  .admin-quick-recovery-btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .admin-rec-btn {
+    padding: 7px 13px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    color: #1e293b;
+    font-size: 0.84rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .admin-rec-btn:hover {
+    background: #f1f5f9;
+  }
+  .admin-rec-btn.primary {
+    background: #2563eb;
+    color: #fff;
+    border-color: #2563eb;
+  }
+  .admin-rec-btn.primary:hover {
+    background: #1d4ed8;
+  }
+  .admin-rec-btn.warning {
+    background: #fff7ed;
+    color: #c2410c;
+    border-color: #fdba74;
+  }
+  .admin-rec-btn.warning:hover {
+    background: #ffedd5;
+  }
+
+  /* 관리자 대시보드 카탈로그 복구 & 휴지통 패널 */
+  .admin-recovery-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+  .admin-recovery-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .admin-recovery-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+  }
+  .admin-cat-status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .admin-cat-status-item {
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px;
+    background: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .admin-cat-status-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.92rem;
+  }
+  .cat-count-badge {
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 999px;
+  }
+  .cat-count-badge.ok {
+    background: #dcfce7;
+    color: #166534;
+  }
+  .cat-count-badge.modified {
+    background: #fef3c7;
+    color: #92400e;
+  }
+  .admin-trash-box {
+    border-top: 1px solid #e2e8f0;
+    padding-top: 14px;
+    margin-top: 10px;
+  }
+  .admin-trash-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .admin-trash-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+    padding: 6px 11px;
+    border-radius: 8px;
+    font-size: 0.84rem;
+  }
+  .admin-trash-chip button {
+    background: #16a34a;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .admin-trash-chip button:hover {
+    background: #15803d;
+  }
+
+  /* 다크모드 지원 */
+  body.dark-mode .admin-recovery-card {
+    background: #1e293b;
+    border-color: #334155;
+    color: #f1f5f9;
+  }
+  body.dark-mode .admin-cat-status-item {
+    background: #0f172a;
+    border-color: #334155;
+  }
+  body.dark-mode .admin-rec-btn {
+    background: #334155;
+    border-color: #475569;
+    color: #f8fafc;
+  }
+  body.dark-mode .admin-trash-box {
+    border-color: #334155;
+  }
+</style>
+
+<script>
+  // ==========================================
+  // [관리자 고도화] 카테고리별 20종 복구 · 실행취소(Undo) · 휴지통 · 백업
+  // ==========================================
+  (function setupAdminCatalogRecovery() {
+    let lastDeletedRecord = null;
+    let undoTimer = null;
+
+    // 1. 실행 취소(Undo) 플로팅 바 생성
+    const undoToastEl = document.createElement('div');
+    undoToastEl.id = 'admin-undo-toast';
+    undoToastEl.className = 'admin-undo-toast';
+    undoToastEl.innerHTML = `
+      <span id="admin-undo-text">술이 목록에서 제거되었습니다.</span>
+      <button type="button" class="admin-undo-btn" id="admin-undo-action-btn">↩️ 방금 삭제 취소</button>
+    `;
+    document.body.appendChild(undoToastEl);
+
+    function showUndoToast(liquorName) {
+      const textEl = document.getElementById('admin-undo-text');
+      if (textEl) textEl.textContent = `🗑️ '${liquorName}' 제거됨`;
+      undoToastEl.classList.add('show');
+      clearTimeout(undoTimer);
+      undoTimer = setTimeout(() => {
+        undoToastEl.classList.remove('show');
+      }, 6000);
+    }
+
+    function refreshAllCatalogViews(targetCategoryKey) {
+      applySavedCatalogChanges();
+      const activeCat = document.querySelector('#category-grid .ingredient-card.active');
+      const catToRender = targetCategoryKey || (activeCat && activeCat.dataset.category);
+      if (catToRender && typeof renderSubLiquors === 'function') {
+        renderSubLiquors(catToRender);
+      }
+      if (typeof renderAdminDashboard === 'function') {
+        renderAdminDashboard();
+      }
+    }
+
+    // 2. 방금 삭제한 항목 즉시 되살리기
+    document.getElementById('admin-undo-action-btn').addEventListener('click', () => {
+      if (!lastDeletedRecord || !isAdmin()) return;
+      const { categoryKey, item, isCustom } = lastDeletedRecord;
+
+      if (isCustom) {
+        let customItems = [];
+        try {
+          customItems = JSON.parse(localStorage.getItem('myHomebarCustomLiquors') || '[]');
+        } catch (e) {}
+        if (!customItems.some(i => i.id === item.id)) {
+          customItems.push(item);
+          localStorage.setItem('myHomebarCustomLiquors', JSON.stringify(customItems));
+        }
+      } else {
+        let deletedIds = [];
+        try {
+          deletedIds = JSON.parse(localStorage.getItem('myHomebarDeletedLiquorIds') || '[]');
+        } catch (e) {}
+        deletedIds = deletedIds.filter(id => id !== item.id);
+        localStorage.setItem('myHomebarDeletedLiquorIds', JSON.stringify(deletedIds));
+      }
+
+      undoToastEl.classList.remove('show');
+      lastDeletedRecord = null;
+      refreshAllCatalogViews(categoryKey);
+      showToast(`↩️ '${item.name}'을(를) 원래 목록으로 복구했습니다!`);
+    });
+
+    // 3. 기존 deleteCatalogLiquor 확장 (삭제 전 스냅샷 저장 + Undo 알림)
+    deleteCatalogLiquor = function(categoryKey, liquorId, liquorName) {
+      if (!isAdmin()) return;
+
+      const currentList = liquorData[categoryKey]?.items || [];
+      const targetItem = currentList.find(i => i.id === liquorId);
+      const isCustom = String(liquorId).startsWith('adm_');
+
+      if (targetItem) {
+        lastDeletedRecord = {
+          categoryKey,
+          item: JSON.parse(JSON.stringify(targetItem)),
+          isCustom
+        };
+      }
+
+      let customItems = [];
+      let deletedIds = [];
+      try {
+        customItems = JSON.parse(localStorage.getItem('myHomebarCustomLiquors') || '[]');
+        deletedIds = JSON.parse(localStorage.getItem('myHomebarDeletedLiquorIds') || '[]');
+      } catch (e) {}
+
+      if (isCustom) {
+        customItems = customItems.filter(i => i.id !== liquorId);
+        localStorage.setItem('myHomebarCustomLiquors', JSON.stringify(customItems));
+      } else if (!deletedIds.includes(liquorId)) {
+        deletedIds.push(liquorId);
+        localStorage.setItem('myHomebarDeletedLiquorIds', JSON.stringify(deletedIds));
+      }
+
+      refreshAllCatalogViews(categoryKey);
+      showUndoToast(liquorName);
+    };
+
+    // 4. 특정 카테고리만 처음 기본 20종으로 복구하는 함수
+    function restoreSingleCategoryTo20(categoryKey) {
+      if (!isAdmin() || !defaultLiquorSnapshot[categoryKey]) return;
+      const catName = categoryLabels[categoryKey] || categoryKey;
+      const defaultIds = new Set(defaultLiquorSnapshot[categoryKey].items.map(i => i.id));
+
+      let deletedIds = [];
+      let customItems = [];
+      try {
+        deletedIds = JSON.parse(localStorage.getItem('myHomebarDeletedLiquorIds') || '[]');
+        customItems = JSON.parse(localStorage.getItem('myHomebarCustomLiquors') || '[]');
+      } catch (e) {}
+
+      // 해당 카테고리의 삭제 기록 제거 + 관리자 추가 항목 제거해 정확히 처음 20종으로 복원
+      deletedIds = deletedIds.filter(id => !defaultIds.has(id));
+      customItems = customItems.filter(item => item.categoryKey !== categoryKey);
+
+      localStorage.setItem('myHomebarDeletedLiquorIds', JSON.stringify(deletedIds));
+      localStorage.setItem('myHomebarCustomLiquors', JSON.stringify(customItems));
+
+      refreshAllCatalogViews(categoryKey);
+      showToast(`🔄 '${catName}' 카테고리를 처음 기본 20종으로 복구했습니다!`);
+    }
+
+    // 5. 전체 7개 카테고리 모두 처음 기본 20종씩(총 140종)으로 일괄 복구
+    function restoreAllCategoriesTo20() {
+      if (!isAdmin()) return;
+      if (!confirm('7개 카테고리 모두 처음 기본 20종씩(총 140종)으로 되돌릴까요?\n(삭제했던 기본 술이 모두 복원됩니다.)')) {
+        return;
+      }
+      localStorage.removeItem('myHomebarCustomLiquors');
+      localStorage.removeItem('myHomebarDeletedLiquorIds');
+      undoToastEl.classList.remove('show');
+      refreshAllCatalogViews();
+      showToast('🔄 모든 카테고리가 처음 기본 20종씩(총 140종)으로 복구되었습니다!');
+    }
+
+    // 6. 개별 삭제된 기본 술 1병 복원
+    function restoreSingleDefaultLiquor(liquorId, liquorName, categoryKey) {
+      if (!isAdmin()) return;
+      let deletedIds = [];
+      try {
+        deletedIds = JSON.parse(localStorage.getItem('myHomebarDeletedLiquorIds') || '[]');
+      } catch (e) {}
+      deletedIds = deletedIds.filter(id => id !== liquorId);
+      localStorage.setItem('myHomebarDeletedLiquorIds', JSON.stringify(deletedIds));
+
+      refreshAllCatalogViews(categoryKey);
+      showToast(`✅ '${liquorName}'을(를) 목록에 다시 복원했습니다!`);
+    }
+
+    // 7. 술 고르기 탭의 관리자 패널(#admin-liquor-panel)에 빠른 복구 바 주입
+    const adminLiqPanel = document.getElementById('admin-liquor-panel');
+    if (adminLiqPanel && !document.getElementById('admin-quick-recovery-bar')) {
+      const quickBar = document.createElement('div');
+      quickBar.id = 'admin-quick-recovery-bar';
+      quickBar.className = 'admin-quick-recovery-bar';
+      quickBar.innerHTML = `
+        <span style="font-size:0.85rem; color:#64748b;">💡 실수로 술을 지웠나요?</span>
+        <div class="admin-quick-recovery-btns">
+          <button type="button" class="admin-rec-btn warning" id="quick-restore-current-cat-btn">🔄 현재 카테고리 20종 복구</button>
+          <button type="button" class="admin-rec-btn primary" id="quick-restore-all-20-btn">🔄 전체 7종 기본 20개씩 복구 (140종)</button>
+        </div>
+      `;
+      adminLiqPanel.appendChild(quickBar);
+
+      quickBar.querySelector('#quick-restore-current-cat-btn').addEventListener('click', () => {
+        const activeCat = document.querySelector('#category-grid .ingredient-card.active');
+        if (!activeCat) {
+          showToast('먼저 위에서 복구할 술 카테고리(보드카, 위스키 등)를 선택해 주세요!');
+          return;
+        }
+        restoreSingleCategoryTo20(activeCat.dataset.category);
+      });
+
+      quickBar.querySelector('#quick-restore-all-20-btn').addEventListener('click', restoreAllCategoriesTo20);
+    }
+
+    // 8. 관리자 대시보드(#view-admin) 전용 카탈로그 복구 & 휴지통 & 백업 카드 렌더링
+    function renderAdminRecoveryCard() {
+      const viewAdminEl = document.getElementById('view-admin');
+      if (!viewAdminEl || !isAdmin()) return;
+
+      let card = document.getElementById('admin-catalog-recovery-card');
+      if (!card) {
+        card = document.createElement('section');
+        card.id = 'admin-catalog-recovery-card';
+        card.className = 'admin-recovery-card';
+        viewAdminEl.appendChild(card);
+      }
+
+      let deletedIds = [];
+      let customItems = [];
+      try {
+        deletedIds = JSON.parse(localStorage.getItem('myHomebarDeletedLiquorIds') || '[]');
+        customItems = JSON.parse(localStorage.getItem('myHomebarCustomLiquors') || '[]');
+      } catch (e) {}
+      const deletedSet = new Set(deletedIds);
+
+      // 카테고리별 상태 카드 HTML 생성
+      const catCardsHtml = Object.keys(defaultLiquorSnapshot).map(catKey => {
+        const catName = categoryLabels[catKey] || catKey;
+        const currentCount = liquorData[catKey]?.items.length || 0;
+        const defaultCount = defaultLiquorSnapshot[catKey].items.length; // 20
+        const hasDeletedInCat = defaultLiquorSnapshot[catKey].items.some(i => deletedSet.has(i.id));
+        const hasCustomInCat = customItems.some(i => i.categoryKey === catKey);
+        const isExact20 = currentCount === defaultCount && !hasDeletedInCat && !hasCustomInCat;
+
+        return `
+          <div class="admin-cat-status-item">
+            <div class="admin-cat-status-top">
+              <strong>🍾 ${catName}</strong>
+              <span class="cat-count-badge ${isExact20 ? 'ok' : 'modified'}">
+                현재 ${currentCount}종 / 기본 ${defaultCount}종
+              </span>
+            </div>
+            <button type="button" class="admin-rec-btn ${isExact20 ? '' : 'warning'}" data-restore-cat="${catKey}" ${isExact20 ? 'disabled' : ''}>
+              ${isExact20 ? '✔ 기본 20종 유지중' : `🔄 ${catName} 20종으로 복구`}
+            </button>
+          </div>
+        `;
+      }).join('');
+
+      // 삭제된 기본 술 휴지통 목록 추출
+      const deletedLiquorsList = [];
+      Object.entries(defaultLiquorSnapshot).forEach(([catKey, catObj]) => {
+        catObj.items.forEach(item => {
+          if (deletedSet.has(item.id)) {
+            deletedLiquorsList.push({ ...item, catKey, catName: categoryLabels[catKey] || catKey });
+          }
+        });
+      });
+
+      const trashHtml = deletedLiquorsList.length === 0
+        ? '<p style="margin:8px 0 0; font-size:0.86rem; color:#64748b;">현재 삭제된 기본 술이 없습니다. (모두 정상 등록 상태)</p>'
+        : `<div class="admin-trash-list">
+            ${deletedLiquorsList.map(item => `
+              <span class="admin-trash-chip">
+                <span>[${escapeHTML(item.catName)}] ${escapeHTML(item.name)}</span>
+                <button type="button" data-restore-item-id="${item.id}" data-restore-item-name="${escapeHTML(item.name)}" data-restore-item-cat="${item.catKey}">+ 복원</button>
+              </span>
+            `).join('')}
+          </div>`;
+
+      card.innerHTML = `
+        <div class="admin-recovery-header">
+          <div>
+            <h3>🔄 술 카탈로그 20종 복구 & 백업 관리</h3>
+            <p style="margin:4px 0 0; font-size:0.86rem; color:#64748b;">실수로 삭제한 술을 카테고리별 20종으로 되돌리거나, 삭제된 술만 골라 복원할 수 있습니다.</p>
+          </div>
+          <div class="admin-quick-recovery-btns">
+            <button type="button" class="admin-rec-btn" id="admin-export-catalog-btn">💾 카탈로그 백업 저장</button>
+            <button type="button" class="admin-rec-btn primary" id="admin-restore-all-20-main-btn">🔄 전체 기본 20개씩 복구 (140종)</button>
+          </div>
+        </div>
+
+        <div class="admin-cat-status-grid">
+          ${catCardsHtml}
+        </div>
+
+        <div class="admin-trash-box">
+          <strong style="font-size:0.95rem;">🗑️ 삭제된 기본 술 휴지통 (${deletedLiquorsList.length}병)</strong>
+          ${trashHtml}
+        </div>
+      `;
+
+      // 이벤트 바인딩
+      card.querySelector('#admin-restore-all-20-main-btn').addEventListener('click', restoreAllCategoriesTo20);
+
+      card.querySelectorAll('[data-restore-cat]').forEach(btn => {
+        btn.addEventListener('click', () => restoreSingleCategoryTo20(btn.dataset.restoreCat));
+      });
+
+      card.querySelectorAll('[data-restore-item-id]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          restoreSingleDefaultLiquor(
+            btn.dataset.restoreItemId,
+            btn.dataset.restoreItemName,
+            btn.dataset.restoreItemCat
+          );
+        });
+      });
+
+      // 카탈로그 JSON 백업 다운로드
+      card.querySelector('#admin-export-catalog-btn').addEventListener('click', () => {
+        const backupPayload = {
+          exportedAt: new Date().toISOString(),
+          deletedIds: JSON.parse(localStorage.getItem('myHomebarDeletedLiquorIds') || '[]'),
+          customItems: JSON.parse(localStorage.getItem('myHomebarCustomLiquors') || '[]')
+        };
+        const blob = new Blob([JSON.stringify(backupPayload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `homebar_catalog_backup_${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('💾 현재 술 카탈로그 설정이 JSON 파일로 백업되었습니다!');
+      });
+    }
+
+    // 기존 renderAdminDashboard 함수와 자동 연동
+    if (typeof renderAdminDashboard === 'function') {
+      const origRenderAdminDashboard = renderAdminDashboard;
+      renderAdminDashboard = function() {
+        origRenderAdminDashboard();
+        renderAdminRecoveryCard();
+      };
+    }
+
+    // 현재 이미 관리자 로그인 상태라면 즉시 렌더링
+    if (typeof isAdmin === 'function' && isAdmin()) {
+      renderAdminRecoveryCard();
+    }
+  })();
+</script>
+<style id="admin-recovery-styles">
+  /* 삭제 직후 실행 취소(Undo) 플로팅 토스트 */
+  .admin-undo-toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #1e293b;
+    color: #f8fafc;
+    padding: 12px 18px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.28);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    z-index: 9999;
+    font-size: 0.92rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.25s ease;
+    border: 1px solid #475569;
+  }
+  .admin-undo-toast.show {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+  }
+  .admin-undo-btn {
+    background: #ff9800;
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+  .admin-undo-btn:hover {
+    background: #e68900;
+  }
+
+  /* 술 고르기 화면 관리자 빠른 복구 바 */
+  .admin-quick-recovery-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed #cbd5e1;
+  }
+  .admin-quick-recovery-btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .admin-rec-btn {
+    padding: 7px 13px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    color: #1e293b;
+    font-size: 0.84rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .admin-rec-btn:hover {
+    background: #f1f5f9;
+  }
+  .admin-rec-btn.primary {
+    background: #2563eb;
+    color: #fff;
+    border-color: #2563eb;
+  }
+  .admin-rec-btn.primary:hover {
+    background: #1d4ed8;
+  }
+  .admin-rec-btn.warning {
+    background: #fff7ed;
+    color: #c2410c;
+    border-color: #fdba74;
+  }
+  .admin-rec-btn.warning:hover {
+    background: #ffedd5;
+  }
+
+  /* 관리자 대시보드 카탈로그 복구 & 휴지통 패널 */
+  .admin-recovery-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+  .admin-recovery-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .admin-recovery-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+  }
+  .admin-cat-status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .admin-cat-status-item {
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px;
+    background: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .admin-cat-status-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.92rem;
+  }
+  .cat-count-badge {
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 999px;
+  }
+  .cat-count-badge.ok {
+    background: #dcfce7;
+    color: #166534;
+  }
+  .cat-count-badge.modified {
+    background: #fef3c7;
+    color: #92400e;
+  }
+  .admin-trash-box {
+    border-top: 1px solid #e2e8f0;
+    padding-top: 14px;
+    margin-top: 10px;
+  }
+  .admin-trash-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .admin-trash-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+    padding: 6px 11px;
+    border-radius: 8px;
+    font-size: 0.84rem;
+  }
+  .admin-trash-chip button {
+    background: #16a34a;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .admin-trash-chip button:hover {
+    background: #15803d;
+  }
+
+  /* 다크모드 지원 */
+  body.dark-mode .admin-recovery-card {
+    background: #1e293b;
+    border-color: #334155;
+    color: #f1f5f9;
+  }
+  body.dark-mode .admin-cat-status-item {
+    background: #0f172a;
+    border-color: #334155;
+  }
+  body.dark-mode .admin-rec-btn {
+    background: #334155;
+    border-color: #475569;
+    color: #f8fafc;
+  }
+  body.dark-mode .admin-trash-box {
+    border-color: #334155;
+  }
+</style>
+
+<script>
+  // ==========================================
+  // [관리자 고도화] 카테고리별 20종 복구 · 실행취소(Undo) · 휴지통 · 백업
+  // ==========================================
+  (function setupAdminCatalogRecovery() {
+    let lastDeletedRecord = null;
+    let undoTimer = null;
+
+    // 1. 실행 취소(Undo) 플로팅 바 생성
+    const undoToastEl = document.createElement('div');
+    undoToastEl.id = 'admin-undo-toast';
+    undoToastEl.className = 'admin-undo-toast';
+    undoToastEl.innerHTML = `
+      <span id="admin-undo-text">술이 목록에서 제거되었습니다.</span>
+      <button type="button" class="admin-undo-btn" id="admin-undo-action-btn">↩️ 방금 삭제 취소</button>
+    `;
+    document.body.appendChild(undoToastEl);
+
+    function showUndoToast(liquorName) {
+      const textEl = document.getElementById('admin-undo-text');
+      if (textEl) textEl.textContent = `🗑️ '${liquorName}' 제거됨`;
+      undoToastEl.classList.add('show');
+      clearTimeout(undoTimer);
+      undoTimer = setTimeout(() => {
+        undoToastEl.classList.remove('show');
+      }, 6000);
+    }
+
+    function refreshAllCatalogViews(targetCategoryKey) {
+      applySavedCatalogChanges();
+      const activeCat = document.querySelector('#category-grid .ingredient-card.active');
+      const catToRender = targetCategoryKey || (activeCat && activeCat.dataset.category);
+      if (catToRender && typeof renderSubLiquors === 'function') {
+        renderSubLiquors(catToRender);
+      }
+      if (typeof renderAdminDashboard === 'function') {
+        renderAdminDashboard();
+      }
+    }
+
+    // 2. 방금 삭제한 항목 즉시 되살리기
+    document.getElementById('admin-undo-action-btn').addEventListener('click', () => {
+      if (!lastDeletedRecord || !isAdmin()) return;
+      const { categoryKey, item, isCustom } = lastDeletedRecord;
+
+      if (isCustom) {
+        let customItems = [];
+        try {
+          customItems = JSON.parse(localStorage.getItem('myHomebarCustomLiquors') || '[]');
+        } catch (e) {}
+        if (!customItems.some(i => i.id === item.id)) {
+          customItems.push(item);
+          localStorage.setItem('myHomebarCustomLiquors', JSON.stringify(customItems));
+        }
+      } else {
+        let deletedIds = [];
+        try {
+          deletedIds = JSON.parse(localStorage.getItem('myHomebarDeletedLiquorIds') || '[]');
+        } catch (e) {}
+        deletedIds = deletedIds.filter(id => id !== item.id);
+        localStorage.setItem('myHomebarDeletedLiquorIds', JSON.stringify(deletedIds));
+      }
+
+      undoToastEl.classList.remove('show');
+      lastDeletedRecord = null;
+      refreshAllCatalogViews(categoryKey);
+      showToast(`↩️ '${item.name}'을(를) 원래 목록으로 복구했습니다!`);
+    });
+
+    // 3. 기존 deleteCatalogLiquor 확장 (삭제 전 스냅샷 저장 + Undo 알림)
+    deleteCatalogLiquor = function(categoryKey, liquorId, liquorName) {
+      if (!isAdmin()) return;
+
+      const currentList = liquorData[categoryKey]?.items || [];
+      const targetItem = currentList.find(i => i.id === liquorId);
+      const isCustom = String(liquorId).startsWith('adm_');
+
+      if (targetItem) {
+        lastDeletedRecord = {
+          categoryKey,
+          item: JSON.parse(JSON.stringify(targetItem)),
+          isCustom
+        };
+      }
+
+      let customItems = [];
+      let deletedIds = [];
+      try {
+        customItems = JSON.parse(localStorage.getItem('myHomebarCustomLiquors') || '[]');
+        deletedIds = JSON.parse(localStorage.getItem('myHomebarDeletedLiquorIds') || '[]');
+      } catch (e) {}
+
+      if (isCustom) {
+        customItems = customItems.filter(i => i.id !== liquorId);
+        localStorage.setItem('myHomebarCustomLiquors', JSON.stringify(customItems));
+      } else if (!deletedIds.includes(liquorId)) {
+        deletedIds.push(liquorId);
+        localStorage.setItem('myHomebarDeletedLiquorIds', JSON.stringify(deletedIds));
+      }
+
+      refreshAllCatalogViews(categoryKey);
+      showUndoToast(liquorName);
+    };
+
+    // 4. 특정 카테고리만 처음 기본 20종으로 복구하는 함수
+    function restoreSingleCategoryTo20(categoryKey) {
+      if (!isAdmin() || !defaultLiquorSnapshot[categoryKey]) return;
+      const catName = categoryLabels[categoryKey] || categoryKey;
+      const defaultIds = new Set(defaultLiquorSnapshot[categoryKey].items.map(i => i.id));
+
+      let deletedIds = [];
+      let customItems = [];
+      try {
+        deletedIds = JSON.parse(localStorage.getItem('myHomebarDeletedLiquorIds') || '[]');
+        customItems = JSON.parse(localStorage.getItem('myHomebarCustomLiquors') || '[]');
+      } catch (e) {}
+
+      // 해당 카테고리의 삭제 기록 제거 + 관리자 추가 항목 제거해 정확히 처음 20종으로 복원
+      deletedIds = deletedIds.filter(id => !defaultIds.has(id));
+      customItems = customItems.filter(item => item.categoryKey !== categoryKey);
+
+      localStorage.setItem('myHomebarDeletedLiquorIds', JSON.stringify(deletedIds));
+      localStorage.setItem('myHomebarCustomLiquors', JSON.stringify(customItems));
+
+      refreshAllCatalogViews(categoryKey);
+      showToast(`🔄 '${catName}' 카테고리를 처음 기본 20종으로 복구했습니다!`);
+    }
+
+    // 5. 전체 7개 카테고리 모두 처음 기본 20종씩(총 140종)으로 일괄 복구
+    function restoreAllCategoriesTo20() {
+      if (!isAdmin()) return;
+      if (!confirm('7개 카테고리 모두 처음 기본 20종씩(총 140종)으로 되돌릴까요?\n(삭제했던 기본 술이 모두 복원됩니다.)')) {
+        return;
+      }
+      localStorage.removeItem('myHomebarCustomLiquors');
+      localStorage.removeItem('myHomebarDeletedLiquorIds');
+      undoToastEl.classList.remove('show');
+      refreshAllCatalogViews();
+      showToast('🔄 모든 카테고리가 처음 기본 20종씩(총 140종)으로 복구되었습니다!');
+    }
+
+    // 6. 개별 삭제된 기본 술 1병 복원
+    function restoreSingleDefaultLiquor(liquorId, liquorName, categoryKey) {
+      if (!isAdmin()) return;
+      let deletedIds = [];
+      try {
+        deletedIds = JSON.parse(localStorage.getItem('myHomebarDeletedLiquorIds') || '[]');
+      } catch (e) {}
+      deletedIds = deletedIds.filter(id => id !== liquorId);
+      localStorage.setItem('myHomebarDeletedLiquorIds', JSON.stringify(deletedIds));
+
+      refreshAllCatalogViews(categoryKey);
+      showToast(`✅ '${liquorName}'을(를) 목록에 다시 복원했습니다!`);
+    }
+
+    // 7. 술 고르기 탭의 관리자 패널(#admin-liquor-panel)에 빠른 복구 바 주입
+    const adminLiqPanel = document.getElementById('admin-liquor-panel');
+    if (adminLiqPanel && !document.getElementById('admin-quick-recovery-bar')) {
+      const quickBar = document.createElement('div');
+      quickBar.id = 'admin-quick-recovery-bar';
+      quickBar.className = 'admin-quick-recovery-bar';
+      quickBar.innerHTML = `
+        <span style="font-size:0.85rem; color:#64748b;">💡 실수로 술을 지웠나요?</span>
+        <div class="admin-quick-recovery-btns">
+          <button type="button" class="admin-rec-btn warning" id="quick-restore-current-cat-btn">🔄 현재 카테고리 20종 복구</button>
+          <button type="button" class="admin-rec-btn primary" id="quick-restore-all-20-btn">🔄 전체 7종 기본 20개씩 복구 (140종)</button>
+        </div>
+      `;
+      adminLiqPanel.appendChild(quickBar);
+
+      quickBar.querySelector('#quick-restore-current-cat-btn').addEventListener('click', () => {
+        const activeCat = document.querySelector('#category-grid .ingredient-card.active');
+        if (!activeCat) {
+          showToast('먼저 위에서 복구할 술 카테고리(보드카, 위스키 등)를 선택해 주세요!');
+          return;
+        }
+        restoreSingleCategoryTo20(activeCat.dataset.category);
+      });
+
+      quickBar.querySelector('#quick-restore-all-20-btn').addEventListener('click', restoreAllCategoriesTo20);
+    }
+
+    // 8. 관리자 대시보드(#view-admin) 전용 카탈로그 복구 & 휴지통 & 백업 카드 렌더링
+    function renderAdminRecoveryCard() {
+      const viewAdminEl = document.getElementById('view-admin');
+      if (!viewAdminEl || !isAdmin()) return;
+
+      let card = document.getElementById('admin-catalog-recovery-card');
+      if (!card) {
+        card = document.createElement('section');
+        card.id = 'admin-catalog-recovery-card';
+        card.className = 'admin-recovery-card';
+        viewAdminEl.appendChild(card);
+      }
+
+      let deletedIds = [];
+      let customItems = [];
+      try {
+        deletedIds = JSON.parse(localStorage.getItem('myHomebarDeletedLiquorIds') || '[]');
+        customItems = JSON.parse(localStorage.getItem('myHomebarCustomLiquors') || '[]');
+      } catch (e) {}
+      const deletedSet = new Set(deletedIds);
+
+      // 카테고리별 상태 카드 HTML 생성
+      const catCardsHtml = Object.keys(defaultLiquorSnapshot).map(catKey => {
+        const catName = categoryLabels[catKey] || catKey;
+        const currentCount = liquorData[catKey]?.items.length || 0;
+        const defaultCount = defaultLiquorSnapshot[catKey].items.length; // 20
+        const hasDeletedInCat = defaultLiquorSnapshot[catKey].items.some(i => deletedSet.has(i.id));
+        const hasCustomInCat = customItems.some(i => i.categoryKey === catKey);
+        const isExact20 = currentCount === defaultCount && !hasDeletedInCat && !hasCustomInCat;
+
+        return `
+          <div class="admin-cat-status-item">
+            <div class="admin-cat-status-top">
+              <strong>🍾 ${catName}</strong>
+              <span class="cat-count-badge ${isExact20 ? 'ok' : 'modified'}">
+                현재 ${currentCount}종 / 기본 ${defaultCount}종
+              </span>
+            </div>
+            <button type="button" class="admin-rec-btn ${isExact20 ? '' : 'warning'}" data-restore-cat="${catKey}" ${isExact20 ? 'disabled' : ''}>
+              ${isExact20 ? '✔ 기본 20종 유지중' : `🔄 ${catName} 20종으로 복구`}
+            </button>
+          </div>
+        `;
+      }).join('');
+
+      // 삭제된 기본 술 휴지통 목록 추출
+      const deletedLiquorsList = [];
+      Object.entries(defaultLiquorSnapshot).forEach(([catKey, catObj]) => {
+        catObj.items.forEach(item => {
+          if (deletedSet.has(item.id)) {
+            deletedLiquorsList.push({ ...item, catKey, catName: categoryLabels[catKey] || catKey });
+          }
+        });
+      });
+
+      const trashHtml = deletedLiquorsList.length === 0
+        ? '<p style="margin:8px 0 0; font-size:0.86rem; color:#64748b;">현재 삭제된 기본 술이 없습니다. (모두 정상 등록 상태)</p>'
+        : `<div class="admin-trash-list">
+            ${deletedLiquorsList.map(item => `
+              <span class="admin-trash-chip">
+                <span>[${escapeHTML(item.catName)}] ${escapeHTML(item.name)}</span>
+                <button type="button" data-restore-item-id="${item.id}" data-restore-item-name="${escapeHTML(item.name)}" data-restore-item-cat="${item.catKey}">+ 복원</button>
+              </span>
+            `).join('')}
+          </div>`;
+
+      card.innerHTML = `
+        <div class="admin-recovery-header">
+          <div>
+            <h3>🔄 술 카탈로그 20종 복구 & 백업 관리</h3>
+            <p style="margin:4px 0 0; font-size:0.86rem; color:#64748b;">실수로 삭제한 술을 카테고리별 20종으로 되돌리거나, 삭제된 술만 골라 복원할 수 있습니다.</p>
+          </div>
+          <div class="admin-quick-recovery-btns">
+            <button type="button" class="admin-rec-btn" id="admin-export-catalog-btn">💾 카탈로그 백업 저장</button>
+            <button type="button" class="admin-rec-btn primary" id="admin-restore-all-20-main-btn">🔄 전체 기본 20개씩 복구 (140종)</button>
+          </div>
+        </div>
+
+        <div class="admin-cat-status-grid">
+          ${catCardsHtml}
+        </div>
+
+        <div class="admin-trash-box">
+          <strong style="font-size:0.95rem;">🗑️ 삭제된 기본 술 휴지통 (${deletedLiquorsList.length}병)</strong>
+          ${trashHtml}
+        </div>
+      `;
+
+      // 이벤트 바인딩
+      card.querySelector('#admin-restore-all-20-main-btn').addEventListener('click', restoreAllCategoriesTo20);
+
+      card.querySelectorAll('[data-restore-cat]').forEach(btn => {
+        btn.addEventListener('click', () => restoreSingleCategoryTo20(btn.dataset.restoreCat));
+      });
+
+      card.querySelectorAll('[data-restore-item-id]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          restoreSingleDefaultLiquor(
+            btn.dataset.restoreItemId,
+            btn.dataset.restoreItemName,
+            btn.dataset.restoreItemCat
+          );
+        });
+      });
+
+      // 카탈로그 JSON 백업 다운로드
+      card.querySelector('#admin-export-catalog-btn').addEventListener('click', () => {
+        const backupPayload = {
+          exportedAt: new Date().toISOString(),
+          deletedIds: JSON.parse(localStorage.getItem('myHomebarDeletedLiquorIds') || '[]'),
+          customItems: JSON.parse(localStorage.getItem('myHomebarCustomLiquors') || '[]')
+        };
+        const blob = new Blob([JSON.stringify(backupPayload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `homebar_catalog_backup_${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('💾 현재 술 카탈로그 설정이 JSON 파일로 백업되었습니다!');
+      });
+    }
+
+    // 기존 renderAdminDashboard 함수와 자동 연동
+    if (typeof renderAdminDashboard === 'function') {
+      const origRenderAdminDashboard = renderAdminDashboard;
+      renderAdminDashboard = function() {
+        origRenderAdminDashboard();
+        renderAdminRecoveryCard();
+      };
+    }
+
+    // 현재 이미 관리자 로그인 상태라면 즉시 렌더링
+    if (typeof isAdmin === 'function' && isAdmin()) {
+      renderAdminRecoveryCard();
+    }
+  })();
+</script>
 </body>
 </html>
