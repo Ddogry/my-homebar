@@ -2747,6 +2747,74 @@
       localStorage.removeItem('myHomebarCurrentUserId');
     }
   })();
+
+// ==========================================
+  // 비밀번호 영문(알파벳) 전용 입력 제한
+  // ==========================================
+  (function setupEnglishOnlyPassword() {
+    const loginIdEl = document.getElementById('login-id');
+    const loginPwEl = document.getElementById('login-pw');
+    const signupPwEl = document.getElementById('signup-pw');
+
+    if (loginPwEl) loginPwEl.placeholder = '비밀번호 (영문만 입력)';
+    if (signupPwEl) signupPwEl.placeholder = '비밀번호 (영문 대·소문자만 입력)';
+
+    function enforceEnglishInput(inputEl, errorEl, allowAdminException = false) {
+      if (!inputEl) return;
+
+      inputEl.addEventListener('input', () => {
+        if (allowAdminException && loginIdEl && loginIdEl.value.trim() === '관리자') {
+          return;
+        }
+        const onlyEnglish = inputEl.value.replace(/[^a-zA-Z]/g, '');
+        if (inputEl.value !== onlyEnglish) {
+          inputEl.value = onlyEnglish;
+          if (errorEl) {
+            errorEl.textContent = '⚠️ 비밀번호는 영어(알파벳 대·소문자)만 입력할 수 있습니다.';
+            errorEl.classList.remove('hidden');
+          }
+        } else if (errorEl && errorEl.textContent.includes('영어(알파벳')) {
+          errorEl.classList.add('hidden');
+        }
+      });
+    }
+
+    enforceEnglishInput(loginPwEl, loginErrorEl, true);
+    enforceEnglishInput(signupPwEl, signupErrorEl, false);
+
+    // 아이디 입력칸이 '관리자'에서 다른 아이디로 바뀌면 기존 비밀번호의 숫자·특수문자도 즉시 제거
+    if (loginIdEl && loginPwEl) {
+      loginIdEl.addEventListener('input', () => {
+        if (loginIdEl.value.trim() !== '관리자') {
+          loginPwEl.value = loginPwEl.value.replace(/[^a-zA-Z]/g, '');
+        }
+      });
+    }
+
+    // 폼 제출 시 영문 전용 최종 검증
+    if (loginForm && loginPwEl) {
+      loginForm.addEventListener('submit', (e) => {
+        const isAdminAccount = loginIdEl && loginIdEl.value.trim() === '관리자';
+        if (!isAdminAccount && !/^[a-zA-Z]+$/.test(loginPwEl.value)) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          loginErrorEl.textContent = '⚠️ 비밀번호는 영어(알파벳 대·소문자)만 입력할 수 있습니다.';
+          loginErrorEl.classList.remove('hidden');
+        }
+      }, true);
+    }
+
+    if (signupForm && signupPwEl) {
+      signupForm.addEventListener('submit', (e) => {
+        if (!/^[a-zA-Z]+$/.test(signupPwEl.value)) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          signupErrorEl.textContent = '⚠️ 비밀번호는 영어(알파벳 대·소문자)만 입력할 수 있습니다.';
+          signupErrorEl.classList.remove('hidden');
+        }
+      }, true);
+    }
+  })();
 </script>
 </body>
 </html>
