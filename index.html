@@ -77,13 +77,16 @@
   </div>
 
  <div class="liquor-cabinet-container">
-  <!-- 상단 메뉴 탭 (술 고르기 / 내 술장) -->
+  <!-- 상단 메뉴 탭 (술 고르기 / 내 술장 / 친구 술장 / AI 바텐더) -->
   <div class="top-nav-tabs">
     <button class="nav-tab-btn active" id="tab-browse" data-target="view-browse">
       🍾 술 고르기 & 담기
     </button>
     <button class="nav-tab-btn" id="tab-cabinet" data-target="view-cabinet">
       🗄️ 내 술장 <span id="cabinet-badge" class="tab-count-badge">0</span>
+    </button>
+    <button class="nav-tab-btn" id="tab-friends" data-target="view-friends">
+      👥 친구 술장 <span id="friends-badge" class="tab-count-badge">0</span>
     </button>
     <button class="nav-tab-btn" id="tab-ai" data-target="view-ai">
       🤖 AI 바텐더
@@ -166,7 +169,59 @@
 
     <div id="my-cabinet-grid" class="sub-liquor-grid"></div>
   </div>
-  <!-- [탭 3] AI 바텐더 화면 -->
+
+  <!-- [탭 3] 친구 추가 & 친구 술장 구경하기 화면 -->
+  <div id="view-friends" class="tab-view hidden">
+    <div class="my-cabinet-header">
+      <div>
+        <h2>👥 친구 목록 & 술장 구경</h2>
+        <p class="guide-text">친구 아이디를 추가하고, 친구의 홈바 술장에 어떤 술이 있는지 구경해 보세요!</p>
+      </div>
+    </div>
+
+    <!-- 친구 추가 입력 영역 -->
+    <div class="friend-add-card">
+      <form id="friend-add-form" class="friend-add-form">
+        <input
+          type="text"
+          id="friend-search-input"
+          placeholder="추가할 친구의 아이디 입력 (예: bartender_kim)"
+          autocomplete="off"
+          required
+        />
+        <button type="submit" class="go-browse-btn">+ 친구 추가</button>
+      </form>
+      <p id="friend-add-msg" class="friend-add-msg hidden"></p>
+
+      <!-- 바로 추가 가능한 가입 회원 추천 목록 -->
+      <div class="friend-suggest-wrap">
+        <span class="friend-suggest-label">💡 추가 가능한 회원 (클릭 시 바로 추가):</span>
+        <div id="friend-suggest-list" class="friend-suggest-list"></div>
+      </div>
+    </div>
+
+    <!-- 내 친구 목록 그리드 -->
+    <h3 class="friend-section-title">내 친구 (<span id="friends-total-count">0</span>명)</h3>
+    <div id="friends-list-grid" class="friends-grid"></div>
+
+    <!-- 선택한 친구의 술장 상세 보기 영역 -->
+    <div id="friend-cabinet-section" class="friend-cabinet-section hidden">
+      <div class="friend-cabinet-header">
+        <div class="friend-cabinet-owner">
+          <img id="selected-friend-avatar" src="" alt="친구 프로필" class="friend-owner-avatar" />
+          <div>
+            <h3 id="selected-friend-title">친구의 술장</h3>
+            <span id="selected-friend-subtitle" class="guide-text">@userid · 보유 0병</span>
+          </div>
+        </div>
+        <button type="button" id="close-friend-cabinet-btn" class="clear-cart-btn">✕ 닫기</button>
+      </div>
+
+      <div id="friend-cabinet-grid" class="sub-liquor-grid"></div>
+    </div>
+  </div>
+
+  <!-- [탭 4] AI 바텐더 화면 -->
   <div id="view-ai" class="tab-view hidden">
     <div class="ai-header">
       <div>
@@ -629,6 +684,8 @@
     if (typeof updateCabinetCount === 'function') updateCabinetCount();
     if (typeof renderCartList === 'function') renderCartList();
     if (typeof renderMyCabinet === 'function') renderMyCabinet();
+    if (typeof updateFriendsBadge === 'function') updateFriendsBadge();
+    if (typeof renderFriendsView === 'function') renderFriendsView();
   }
 
   profileTriggerBtn.addEventListener('click', (e) => {
@@ -663,6 +720,7 @@
   logoutBtn.addEventListener('click', () => {
     localStorage.removeItem('myHomebarCurrentUserId');
     currentUser = null;
+    selectedFriendId = null;
     myCabinet.clear();
     cartLiquors.clear();
     profileDropdownCard.classList.add('hidden');
@@ -671,7 +729,6 @@
     showToast('🚪 로그아웃되었습니다.');
   });
 
- 
   // DOM 요소 가져오기
   const categoryCards = document.querySelectorAll('#category-grid .ingredient-card');
   const subSection = document.getElementById('sub-liquor-section');
@@ -699,7 +756,7 @@
     }, 2500);
   }
 
-  // 상단 탭 전환 기능 ('술 고르기' <-> '내 술장')
+  // 상단 탭 전환 기능 ('술 고르기' / '내 술장' / '친구 술장' / 'AI 바텐더')
   const tabButtons = document.querySelectorAll('.nav-tab-btn');
   const tabViews = document.querySelectorAll('.tab-view');
 
@@ -712,6 +769,9 @@
     });
     if (targetId === 'view-cabinet') {
       renderMyCabinet();
+    }
+    if (targetId === 'view-friends') {
+      renderFriendsView();
     }
   }
 
@@ -886,8 +946,344 @@
       myCabinetGridEl.appendChild(card);
     });
   }
-// ==========================================
-  // [탭 3] AI 바텐더 + 사이트 외 술 추천 & 바로 담기
+
+  // ==========================================
+  // [탭 3] 친구 추가 & 친구 술장 구경하기 시스템
+  // ==========================================
+  const friendsBadgeEl = document.getElementById('friends-badge');
+  const friendsTotalCountEl = document.getElementById('friends-total-count');
+  const friendAddForm = document.getElementById('friend-add-form');
+  const friendSearchInput = document.getElementById('friend-search-input');
+  const friendAddMsgEl = document.getElementById('friend-add-msg');
+  const friendSuggestListEl = document.getElementById('friend-suggest-list');
+  const friendsListGridEl = document.getElementById('friends-list-grid');
+
+  const friendCabinetSection = document.getElementById('friend-cabinet-section');
+  const selectedFriendAvatarEl = document.getElementById('selected-friend-avatar');
+  const selectedFriendTitleEl = document.getElementById('selected-friend-title');
+  const selectedFriendSubtitleEl = document.getElementById('selected-friend-subtitle');
+  const closeFriendCabinetBtn = document.getElementById('close-friend-cabinet-btn');
+  const friendCabinetGridEl = document.getElementById('friend-cabinet-grid');
+
+  let selectedFriendId = null;
+
+  // 처음 테스트용 기본 예시 친구 계정 & 술장 데이터 자동 생성 (기존 데이터는 유지)
+  function seedDemoFriends() {
+    const users = getUsersDB();
+    const demoAccounts = [
+      {
+        id: 'bartender_kim',
+        pw: '1234',
+        nickname: '바텐더 김씨',
+        cabinet: [
+          { id: 'g2', name: '탱커레이', abv: '43.1%', img: 'images/gin_tanqueray.png', desc: '주니퍼베리 향이 진해 진토닉에 최적화된 클래식 진', categoryKey: 'gin', fallbackImg: 'my gin.png' },
+          { id: 'l4', name: '코인트로 (Cointreau)', abv: '40%', img: 'images/liq_cointreau.png', desc: '맑고 상큼한 오렌지 껍질 향의 프리미엄 트리플 섹', categoryKey: 'liqueur', fallbackImg: 'my Liqueur.png' },
+          { id: 'r1', name: '바카디 카르타 블랑카', abv: '40%', img: 'images/rum_bacardi.png', desc: '모히토·다이키리의 정석, 가장 대중적인 화이트 럼', categoryKey: 'rum', fallbackImg: 'my rum.png' },
+          { id: 'b2', name: '헤네시 V.S.O.P', abv: '40%', img: 'images/brandy_hennessy_vsop.png', desc: '바닐라와 정향, 계피 향이 우아하게 어우러진 코냑', categoryKey: 'brandy', fallbackImg: 'my Brandy.png' }
+        ]
+      },
+      {
+        id: 'whiskey_lover',
+        pw: '1234',
+        nickname: '위스키매니아',
+        cabinet: [
+          { id: 'w16', name: '맥캘란 12년 더블 캐스크', abv: '40%', img: 'images/whiskey_macallan12.png', desc: '건포도와 꿀, 셰리 오크 풍미가 진한 인기 싱글몰트', categoryKey: 'whiskey', fallbackImg: 'my whiskey.png' },
+          { id: 'w17', name: '발베니 12년 더블우드', abv: '40%', img: 'images/whiskey_balvenie12.png', desc: '꿀과 바닐라, 셰리의 달콤함이 조화로운 싱글몰트', categoryKey: 'whiskey', fallbackImg: 'my whiskey.png' },
+          { id: 'w20', name: '산토리 가쿠빈', abv: '40%', img: 'images/whiskey_kakubin.png', desc: '탄산수와 레몬을 곁들이는 일본식 하이볼의 대명사', categoryKey: 'whiskey', fallbackImg: 'my whiskey.png' }
+        ]
+      },
+      {
+        id: 'cocktail_min',
+        pw: '1234',
+        nickname: '달달홈바민수',
+        cabinet: [
+          { id: 'l1', name: '깔루아 (Kahlúa)', abv: '16%', img: 'images/liq_kahlua.png', desc: '진한 커피와 바닐라 향으로 깔루아 밀크에 쓰이는 리큐르', categoryKey: 'liqueur', fallbackImg: 'my Liqueur.png' },
+          { id: 'l8', name: '피치트리 (Peachtree)', abv: '20%', img: 'images/liq_peachtree.png', desc: '잘 익은 복숭아의 향긋하고 달콤한 맛이 살아있는 술', categoryKey: 'liqueur', fallbackImg: 'my Liqueur.png' },
+          { id: 'r9', name: '말리부', abv: '21%', img: 'images/rum_malibu.png', desc: '달콤한 코코넛 향으로 누구나 즐기기 좋은 럼', categoryKey: 'rum', fallbackImg: 'my rum.png' }
+        ]
+      }
+    ];
+
+    let changed = false;
+    demoAccounts.forEach(acc => {
+      if (!users[acc.id]) {
+        users[acc.id] = {
+          id: acc.id,
+          pw: acc.pw,
+          nickname: acc.nickname,
+          avatar: createDefaultAvatar(acc.nickname)
+        };
+        if (!localStorage.getItem(`myHomebarCabinet_${acc.id}`)) {
+          localStorage.setItem(`myHomebarCabinet_${acc.id}`, JSON.stringify(acc.cabinet));
+        }
+        changed = true;
+      }
+    });
+
+    if (changed) saveUsersDB(users);
+  }
+
+  // 현재 로그인한 유저의 친구 ID 목록 불러오기/저장하기
+  function getMyFriendIds() {
+    if (!currentUser) return [];
+    try {
+      return JSON.parse(localStorage.getItem(`myHomebarFriends_${currentUser.id}`) || '[]');
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveMyFriendIds(friendIds) {
+    if (!currentUser) return;
+    localStorage.setItem(`myHomebarFriends_${currentUser.id}`, JSON.stringify(friendIds));
+    updateFriendsBadge();
+  }
+
+  // 특정 유저의 술장 배열 가져오기
+  function getUserCabinetById(userId) {
+    try {
+      return JSON.parse(localStorage.getItem(`myHomebarCabinet_${userId}`) || '[]');
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function updateFriendsBadge() {
+    const count = getMyFriendIds().length;
+    if (friendsBadgeEl) friendsBadgeEl.textContent = count;
+    if (friendsTotalCountEl) friendsTotalCountEl.textContent = count;
+  }
+
+  function showFriendMessage(text, isError = false) {
+    friendAddMsgEl.textContent = text;
+    friendAddMsgEl.classList.remove('hidden', 'error', 'success');
+    friendAddMsgEl.classList.add(isError ? 'error' : 'success');
+  }
+
+  // 친구 추가 공통 함수
+  function addFriendById(rawId) {
+    if (!currentUser) return;
+    const targetId = rawId.trim();
+    if (!targetId) return;
+
+    if (targetId === currentUser.id) {
+      showFriendMessage('⚠️ 자기 자신은 친구로 추가할 수 없습니다.', true);
+      return;
+    }
+
+    const users = getUsersDB();
+    const targetUser = users[targetId];
+    if (!targetUser) {
+      showFriendMessage(`⚠️ '${targetId}' 아이디를 가진 회원을 찾을 수 없습니다.`, true);
+      return;
+    }
+
+    const friendIds = getMyFriendIds();
+    if (friendIds.includes(targetId)) {
+      showFriendMessage(`ℹ️ '${targetUser.nickname}(@${targetId})'님은 이미 친구 목록에 있습니다.`, true);
+      return;
+    }
+
+    friendIds.push(targetId);
+    saveMyFriendIds(friendIds);
+    friendSearchInput.value = '';
+    showFriendMessage(`✅ '${targetUser.nickname}(@${targetId})'님을 친구로 추가했습니다!`, false);
+    showToast(`👥 ${targetUser.nickname}님이 친구로 추가되었습니다!`);
+
+    renderFriendsView();
+    openFriendCabinet(targetId);
+  }
+
+  friendAddForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    addFriendById(friendSearchInput.value);
+  });
+
+  // 추가 가능한 회원 칩 렌더링
+  function renderSuggestedFriends() {
+    if (!currentUser) return;
+    const users = getUsersDB();
+    const myFriends = new Set(getMyFriendIds());
+    const candidates = Object.values(users).filter(u => u.id !== currentUser.id && !myFriends.has(u.id));
+
+    friendSuggestListEl.innerHTML = '';
+    if (candidates.length === 0) {
+      friendSuggestListEl.innerHTML = '<span class="empty-msg">현재 가입된 모든 회원이 이미 친구입니다! 🎉</span>';
+      return;
+    }
+
+    candidates.slice(0, 6).forEach(user => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'friend-suggest-chip';
+      chip.textContent = `+ ${user.nickname} (@${user.id})`;
+      chip.addEventListener('click', () => addFriendById(user.id));
+      friendSuggestListEl.appendChild(chip);
+    });
+  }
+
+  // 내 친구 목록 카드 렌더링
+  function renderFriendsView() {
+    updateFriendsBadge();
+    renderSuggestedFriends();
+
+    const users = getUsersDB();
+    const friendIds = getMyFriendIds();
+    friendsListGridEl.innerHTML = '';
+
+    if (friendIds.length === 0) {
+      friendsListGridEl.innerHTML = `
+        <div class="empty-cabinet-box">
+          <p>아직 등록된 친구가 없습니다.</p>
+          <span>위에서 친구 아이디를 입력하거나 추천 회원을 클릭해 친구를 추가해 보세요!</span>
+        </div>
+      `;
+      friendCabinetSection.classList.add('hidden');
+      return;
+    }
+
+    friendIds.forEach(fid => {
+      const friend = users[fid];
+      if (!friend) return;
+
+      const friendCabinet = getUserCabinetById(fid);
+      const isSelected = selectedFriendId === fid;
+
+      const card = document.createElement('div');
+      card.className = `friend-card ${isSelected ? 'active' : ''}`;
+      card.innerHTML = `
+        <div class="friend-card-top">
+          <img src="${friend.avatar || createDefaultAvatar(friend.nickname)}" alt="${friend.nickname}" class="friend-avatar" />
+          <div class="friend-info">
+            <strong>${friend.nickname}</strong>
+            <span>@${friend.id}</span>
+            <small class="profile-stat-pill">🗄️ 보유 술장: <b>${friendCabinet.length}</b>병</small>
+          </div>
+        </div>
+        <div class="friend-card-actions">
+          <button type="button" class="friend-view-btn">🍸 술장 보기</button>
+          <button type="button" class="friend-delete-btn">삭제</button>
+        </div>
+      `;
+
+      card.querySelector('.friend-view-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        openFriendCabinet(fid);
+      });
+
+      card.addEventListener('click', () => openFriendCabinet(fid));
+
+      card.querySelector('.friend-delete-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        const updated = getMyFriendIds().filter(id => id !== fid);
+        saveMyFriendIds(updated);
+        if (selectedFriendId === fid) {
+          selectedFriendId = null;
+          friendCabinetSection.classList.add('hidden');
+        }
+        renderFriendsView();
+        showToast(`🗑️ '${friend.nickname}'님을 친구 목록에서 삭제했습니다.`);
+      });
+
+      friendsListGridEl.appendChild(card);
+    });
+
+    if (selectedFriendId && friendIds.includes(selectedFriendId)) {
+      openFriendCabinet(selectedFriendId, false);
+    } else {
+      friendCabinetSection.classList.add('hidden');
+    }
+  }
+
+  // 특정 친구의 술장 상세 열기
+  function openFriendCabinet(friendId, shouldScroll = true) {
+    const users = getUsersDB();
+    const friend = users[friendId];
+    if (!friend) return;
+
+    selectedFriendId = friendId;
+    const friendItems = getUserCabinetById(friendId);
+
+    renderFriendsCardActiveState();
+
+    selectedFriendAvatarEl.src = friend.avatar || createDefaultAvatar(friend.nickname);
+    selectedFriendTitleEl.textContent = `🍸 ${friend.nickname}님의 술장`;
+    selectedFriendSubtitleEl.textContent = `@${friend.id} · 총 ${friendItems.length}병 보유중`;
+
+    friendCabinetGridEl.innerHTML = '';
+
+    if (friendItems.length === 0) {
+      friendCabinetGridEl.innerHTML = `
+        <div class="empty-cabinet-box">
+          <p>${friend.nickname}님의 술장이 아직 비어 있습니다.</p>
+          <span>친구가 술을 담으면 이곳에서 실시간으로 확인할 수 있어요!</span>
+        </div>
+      `;
+    } else {
+      friendItems.forEach(item => {
+        const catName = categoryLabels[item.categoryKey] || '기타';
+        const fallback = item.fallbackImg || 'my whiskey.png';
+        const iHaveIt = myCabinet.has(item.id);
+        const inMyCart = cartLiquors.has(item.id);
+
+        const liquorCard = document.createElement('div');
+        liquorCard.className = `sub-card ${iHaveIt ? 'in-cabinet' : ''}`;
+
+        let actionHtml = `<button type="button" class="friend-copy-liquor-btn">+ 내 바구니에 담기</button>`;
+        if (iHaveIt) {
+          actionHtml = `<span class="select-badge">🤝 나도 보유중</span>`;
+        } else if (inMyCart) {
+          actionHtml = `<span class="select-badge" style="background:#2ecc71;color:#fff;">🛒 내 바구니 담김</span>`;
+        }
+
+        liquorCard.innerHTML = `
+          <span class="cat-pill">${catName}</span>
+          <img src="${item.img}" alt="${item.name}" onerror="this.onerror=null; this.src='${fallback}';" />
+          <h4>${item.name}</h4>
+          <span class="abv-badge">도수 ${item.abv}</span>
+          <p>${item.desc}</p>
+          ${actionHtml}
+        `;
+
+        const copyBtn = liquorCard.querySelector('.friend-copy-liquor-btn');
+        if (copyBtn) {
+          copyBtn.addEventListener('click', () => {
+            cartLiquors.set(item.id, {
+              ...item,
+              fallbackImg: fallback
+            });
+            renderCartList();
+            showToast(`🛒 '${item.name}'을(를) 내 바구니에 담았습니다!`);
+            openFriendCabinet(friendId, false);
+          });
+        }
+
+        friendCabinetGridEl.appendChild(liquorCard);
+      });
+    }
+
+    friendCabinetSection.classList.remove('hidden');
+    if (shouldScroll) {
+      friendCabinetSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+
+  function renderFriendsCardActiveState() {
+    const friendIds = getMyFriendIds();
+    const cards = friendsListGridEl.querySelectorAll('.friend-card');
+    cards.forEach((card, idx) => {
+      card.classList.toggle('active', friendIds[idx] === selectedFriendId);
+    });
+  }
+
+  closeFriendCabinetBtn.addEventListener('click', () => {
+    selectedFriendId = null;
+    friendCabinetSection.classList.add('hidden');
+    renderFriendsCardActiveState();
+  });
+
+  // ==========================================
+  // [탭 4] AI 바텐더 + 사이트 외 술 추천 & 바로 담기
   // ==========================================
   const aiChatBox = document.getElementById('ai-chat-box');
   const aiChatForm = document.getElementById('ai-chat-form');
@@ -1134,10 +1530,12 @@
     btn.disabled = true;
     showToast(`✅ '${btn.dataset.name}'이(가) 내 술장에 직접 등록되었습니다!`);
   });
-  // 초기 화면 로딩 시 개수 반영
+
+  // 초기 예시 친구 생성 및 화면 로딩 시 개수 반영
+  seedDemoFriends();
   updateCabinetCount();
 
- // 새로고침 시 기존 로그인 세션 복원
+  // 새로고침 시 기존 로그인 세션 복원
   (function restoreSession() {
     const savedId = localStorage.getItem('myHomebarCurrentUserId');
     const users = getUsersDB();
@@ -1145,8 +1543,6 @@
       applyLoginSession(users[savedId]);
     }
   })();
-
-
 </script>
 </body>
 </html>
