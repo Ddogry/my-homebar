@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 1. 검색창 이벤트 리스너
     document.getElementById("searchInput").addEventListener("input", (e) => {
-        searchQuery = e.target.value.trim();
+        searchQuery = e.target.value.toLowerCase().trim();
         filterAndRender();
     });
 
@@ -86,12 +86,9 @@ function initIngredientCheckboxes() {
 function filterAndRender() {
     let filtered = allRecipes.filter(recipe => {
         const matchCategory = (selectedCategory === "All") || (recipe.category === selectedCategory);
-        
-        const query = searchQuery.toLowerCase();
-        const matchSearch = (recipe.name && recipe.name.toLowerCase().includes(query)) || 
-                            (recipe.koreanName && recipe.koreanName.toLowerCase().includes(query)) ||
-                            (recipe.description && recipe.description.toLowerCase().includes(query)) ||
-                            recipe.ingredients.some(ing => ing.toLowerCase().includes(query));
+        const matchSearch = recipe.name.toLowerCase().includes(searchQuery) || 
+                            recipe.koreanName.includes(searchQuery) ||
+                            recipe.ingredients.some(ing => ing.toLowerCase().includes(searchQuery));
 
         let matchIngredients = true;
         if (ownedIngredients.size > 0) {
@@ -129,54 +126,7 @@ function renderRecipes(recipes) {
                 </div>
             </div>
         `;
-
-        // ✨ 카드 클릭 시 상세 모달 열기 이벤트 추가
-        card.addEventListener("click", () => {
-            openRecipeModal(recipe);
-        });
         
         container.appendChild(card);
     });
 }
-
-// 상세 모달 열기 함수
-function openRecipeModal(recipe) {
-    const modal = document.getElementById("recipeModal");
-    
-    document.getElementById("modalImage").src = recipe.image;
-    document.getElementById("modalImage").onerror = function() {
-        this.src = 'https://via.placeholder.com/500x240?text=No+Image';
-    };
-    document.getElementById("modalCategory").textContent = `${recipe.category} | 도수 ${recipe.abv}%`;
-    document.getElementById("modalTitle").innerHTML = `${recipe.koreanName} <small>(${recipe.name})</small>`;
-    document.getElementById("modalDesc").textContent = recipe.description;
-    
-    // 재료 태그 렌더링
-    const ingContainer = document.getElementById("modalIngredients");
-    ingContainer.innerHTML = recipe.ingredients
-        .map(ing => `<span class="tag ${ownedIngredients.has(ing) ? 'owned' : ''}">${ing}</span>`)
-        .join('');
-
-    // 제조법 텍스트 (recipe 필드가 없을 경우 대비)
-    document.getElementById("modalRecipe").textContent = recipe.recipe || "상세 레시피 정보가 아직 등록되지 않았습니다.";
-
-    modal.style.display = "flex";
-}
-
-// 모달 닫기 이벤트 (X 버튼 클릭 또는 모달 바깥 배경 클릭 시)
-document.addEventListener("DOMContentLoaded", () => {
-    const modal = document.getElementById("recipeModal");
-    const closeBtn = document.getElementById("closeModalBtn");
-
-    if (closeBtn) {
-        closeBtn.addEventListener("click", () => {
-            modal.style.display = "none";
-        });
-    }
-
-    window.addEventListener("click", (e) => {
-        if (e.target === modal) {
-            modal.style.display = "none";
-        }
-    });
-});

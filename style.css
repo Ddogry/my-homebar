@@ -1,128 +1,2317 @@
-body { font-family: 'Apple SD Gothic Neo', sans-serif; background-color: #121212; color: #e0e0e0; margin: 0; padding: 0; }
-.header { text-align: center; padding: 40px 20px; background: #1e1e1e; border-bottom: 1px solid #333; }
-.header h1 { margin: 0 0 10px 0; color: #fff; }
-.search-box input { width: 100%; max-width: 500px; padding: 14px; font-size: 16px; border-radius: 8px; border: 1px solid #444; background: #2a2a2a; color: #fff; margin-bottom: 15px; outline: none; }
-.category-filters button { background: #2a2a2a; border: 1px solid #444; color: #bbb; padding: 8px 16px; margin: 0 4px; border-radius: 20px; cursor: pointer; transition: 0.2s; }
-.category-filters button.active, .category-filters button:hover { background: #ff7f50; color: #fff; border-color: #ff7f50; }
-
-.main-container { display: flex; max-width: 1300px; margin: 30px auto; padding: 0 20px; gap: 30px; }
-.sidebar { width: 280px; background: #1e1e1e; padding: 20px; border-radius: 12px; height: fit-content; border: 1px solid #333; }
-.sidebar h3 { margin-top: 0; font-size: 16px; color: #fff; }
-.sidebar-desc { font-size: 12px; color: #888; margin-bottom: 15px; }
-.checkbox-group { display: flex; flex-direction: column; gap: 8px; max-height: 300px; overflow-y: auto; margin-bottom: 15px; }
-.checkbox-label { font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 8px; color: #ccc; }
-.reset-btn { width: 100%; padding: 8px; background: #333; border: none; color: #aaa; border-radius: 6px; cursor: pointer; }
-.reset-btn:hover { background: #444; color: #fff; }
-
-.content { flex: 1; }
-.recipe-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
-.recipe-card { background: #1e1e1e; border-radius: 12px; overflow: hidden; border: 1px solid #333; transition: transform 0.2s; }
-.recipe-card:hover { transform: translateY(-4px); }
-.recipe-card img { width: 100%; height: 160px; object-fit: cover; }
-.card-content { padding: 15px; }
-.category-tag { font-size: 11px; color: #ff7f50; font-weight: bold; text-transform: uppercase; }
-.card-content h3 { margin: 8px 0; font-size: 17px; color: #fff; }
-.card-content h3 small { font-size: 13px; color: #888; font-weight: normal; }
-.desc { font-size: 13px; color: #aaa; margin-bottom: 12px; line-height: 1.4; }
-.tag { display: inline-block; background: #2a2a2a; padding: 3px 8px; font-size: 11px; border-radius: 4px; margin-right: 4px; margin-bottom: 4px; color: #bbb; border: 1px solid #444; }
-.tag.owned { background: #2e5a36; color: #a3e4d7; border-color: #3b7a48; }
-.no-result { grid-column: 1 / -1; text-align: center; color: #777; padding: 50px; }
-
-@media (max-width: 768px) {
-  .main-container { flex-direction: column; }
-  .sidebar { width: 100%; }
+/* 전체 컨테이너 */
+.liquor-cabinet-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Pretendard', sans-serif;
 }
-/* 모달 배경 (어두운 반투명) */
-.modal {
-    display: none; /* 기본은 숨김 */
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
+
+/* 카테고리 탭 */
+.category-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+  overflow-x: auto; /* 모바일 가로 스크롤 대비 */
+}
+
+.tab-btn {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  background-color: #fff;
+  color: #666;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tab-btn.active {
+  background-color: #333;
+  color: #fff;
+  border-color: #333;
+}
+
+/* 재료 그리드 레이아웃 */
+.ingredient-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 16px;
+}
+
+/* 개별 재료 카드 */
+.ingredient-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 8px;
+  border: 2px solid #eee;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.hidden-checkbox {
+  display: none; /* 기본 체크박스 숨김 */
+}
+
+.image-wrapper {
+  width: 60px;
+  height: 60px;
+  background-color: #f8f8f8;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.ingredient-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  text-align: center;
+}
+
+/* 재료 카드 선택(Active) 상태 디자인 */
+.ingredient-card:has(.hidden-checkbox:checked) {
+  border-color: #ff5722; /* 포인트 컬러 */
+  background-color: #fff8f5;
+}
+
+.ingredient-card:has(.hidden-checkbox:checked) .ingredient-name {
+  color: #ff5722;
+  font-weight: 700;
+}
+
+/* 이미지 크기 강제 고정 */
+.image-wrapper img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain; /* 이미지가 찌그러지지 않게 비율 유지 */
+}
+
+/* ==============================
+   다크모드 스위치 버튼 스타일
+============================== */
+.header-area {
+  max-width: 600px;
+  margin: 20px auto 0;
+  padding: 0 20px;
+  display: flex;
+  justify-content: flex-end; /* 버튼을 오른쪽으로 밀기 */
+}
+
+.theme-toggle-btn {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  cursor: pointer;
+  font-weight: bold;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+/* ==============================
+   다크모드 일 때 변하는 디자인들
+============================== */
+body {
+  transition: background-color 0.3s, color 0.3s; /* 부드럽게 색이 변하는 효과 */
+}
+
+/* 전체 배경 검은색으로 */
+body.dark-mode {
+  background-color: #121212;
+  color: #ffffff;
+}
+
+/* 다크모드 - 버튼 색상 */
+body.dark-mode .theme-toggle-btn {
+  background-color: #333;
+  color: #fff;
+  border-color: #555;
+}
+
+/* 다크모드 - 탭 버튼 */
+body.dark-mode .tab-btn {
+  background-color: #222;
+  color: #aaa;
+  border-color: #444;
+}
+body.dark-mode .tab-btn.active {
+  background-color: #ff5722;
+  color: #fff;
+  border-color: #ff5722;
+}
+
+/* 다크모드 - 재료 카드 */
+body.dark-mode .ingredient-card {
+  border-color: #333;
+  background-color: #1e1e1e;
+}
+body.dark-mode .image-wrapper {
+  background-color: #2a2a2a;
+}
+body.dark-mode .ingredient-name {
+  color: #eee;
+}
+
+/* 다크모드 - 카드를 선택(체크) 했을 때 */
+body.dark-mode .ingredient-card:has(.hidden-checkbox:checked) {
+  border-color: #ff5722;
+  background-color: #3a1a11; /* 살짝 어두운 주황빛 */
+}
+body.dark-mode .ingredient-card:has(.hidden-checkbox:checked) .ingredient-name {
+  color: #ff5722;
+}
+
+/* 카테고리 카드 이미지 및 선택 효과 */
+.ingredient-card {
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.ingredient-card:hover {
+  transform: translateY(-3px);
+}
+
+.ingredient-card.active {
+  border: 2px solid #ff9800;
+  background-color: rgba(255, 152, 0, 0.12);
+}
+
+.category-img {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+}
+
+/* 세부 술 종류 영역 */
+.sub-liquor-section {
+  margin-top: 28px;
+  padding: 20px;
+  border-radius: 12px;
+  background-color: #f8f9fa;
+  border: 1px solid #e0e0e0;
+}
+
+.sub-liquor-section.hidden {
+  display: none;
+}
+
+.sub-liquor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  margin-top: 14px;
+}
+
+.sub-card {
+  background: #ffffff;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 14px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sub-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.sub-card.selected {
+  border-color: #2ecc71;
+  background-color: rgba(46, 204, 113, 0.08);
+}
+
+.sub-card img {
+  width: 80px;
+  height: 100px;
+  object-fit: contain;
+  margin-bottom: 10px;
+}
+
+.sub-card h4 {
+  margin: 4px 0;
+  font-size: 15px;
+}
+
+.sub-card p {
+  margin: 4px 0 10px;
+  font-size: 12px;
+  color: #666;
+}
+
+.select-badge {
+  font-size: 12px;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: #eee;
+  color: #333;
+}
+
+.sub-card.selected .select-badge {
+  background: #2ecc71;
+  color: #fff;
+}
+
+/* 하단 내 술장 목록 */
+.selected-cabinet {
+  margin-top: 24px;
+  padding: 16px 20px;
+  border-radius: 12px;
+  border: 1px dashed #bbb;
+}
+
+.selected-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.cabinet-tag {
+  background-color: #ff9800;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* 다크모드 대응 */
+body.dark-mode .sub-liquor-section {
+  background-color: #252525;
+  border-color: #444;
+}
+
+body.dark-mode .sub-card {
+  background-color: #1e1e1e;
+  border-color: #444;
+  color: #f1f1f1;
+}
+
+body.dark-mode .sub-card p {
+  color: #aaa;
+}
+
+/* 도수(ABV) 표시 뱃지 */
+.abv-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #d97706;
+  background-color: #fef3c7;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin: 4px 0 6px;
+}
+
+body.dark-mode .abv-badge {
+  color: #fbbf24;
+  background-color: rgba(251, 191, 36, 0.16);
+}
+
+/* 좌우 2단 레이아웃 및 오른쪽 고정(Sticky) 내 술장 패널 */
+.liquor-cabinet-container {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.cabinet-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  margin-top: 16px;
+}
+
+.cabinet-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.selected-cabinet {
+  width: 300px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 24px;
+  margin-top: 0;
+  padding: 20px;
+  border-radius: 12px;
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+}
+
+.selected-cabinet h3 {
+  margin-top: 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+  font-size: 16px;
+}
+
+.empty-msg {
+  font-size: 13px;
+  color: #777;
+  line-height: 1.5;
+}
+
+/* 다크모드 대응 */
+body.dark-mode .selected-cabinet {
+  background-color: #252525;
+  border-color: #444;
+}
+
+body.dark-mode .selected-cabinet h3 {
+  border-bottom-color: #444;
+}
+
+body.dark-mode .empty-msg {
+  color: #aaa;
+}
+
+/* 화면이 좁아질 때는 깨지지 않도록 위아래 배치로 자동 전환 */
+@media (max-width: 850px) {
+  .cabinet-layout {
+    flex-direction: column;
+  }
+
+  .selected-cabinet {
     width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.75);
-    justify-content: center;
-    align-items: center;
+    position: static;
+    max-height: none;
+  }
 }
 
-/* 모달 창 본문 */
-.modal-content {
-    background-color: #1e1e1e;
-    color: #fff;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 500px;
-    max-height: 85vh;
-    overflow-y: auto;
-    position: relative;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-    animation: fadeIn 0.25s ease;
+/* 상단 탭 메뉴 ('술 고르기' / '내 술장' / '친구 술장' / 'AI 바텐더') */
+.top-nav-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 12px;
+  flex-wrap: wrap;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-15px); }
-    to { opacity: 1; transform: translateY(0); }
+.nav-tab-btn {
+  padding: 10px 20px;
+  font-size: 15px;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  background-color: #f3f4f6;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.modal-content img {
-    width: 100%;
-    height: 240px;
-    object-fit: cover;
+.nav-tab-btn:hover {
+  background-color: #e5e7eb;
 }
 
-.modal-body {
-    padding: 24px;
+.nav-tab-btn.active {
+  background-color: #ff9800;
+  color: #ffffff;
 }
 
-.modal-body h2 {
-    margin: 8px 0 12px;
-    font-size: 1.6rem;
+.tab-count-badge {
+  background-color: #ffffff;
+  color: #ff9800;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 800;
 }
 
-.modal-body h4 {
-    margin: 20px 0 10px;
-    color: #ff9f43;
-    font-size: 1.1rem;
+.tab-view.hidden {
+  display: none;
 }
 
-/* 레시피 줄바꿈(\n) 유지 */
-.recipe-steps {
-    white-space: pre-line;
-    line-height: 1.7;
-    background-color: #2a2a2a;
-    padding: 15px;
-    border-radius: 8px;
-    font-size: 0.95rem;
+/* 오른쪽 바구니 헤더 및 '내 술장으로 옮기기' 버튼 */
+.cart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
 }
 
-/* 닫기(X) 버튼 */
-.close-btn {
-    position: absolute;
-    top: 12px;
-    right: 16px;
-    font-size: 28px;
-    font-weight: bold;
-    color: #fff;
-    background: rgba(0, 0, 0, 0.5);
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    text-align: center;
-    line-height: 34px;
-    cursor: pointer;
+.cart-header h3 {
+  margin: 0;
+  padding: 0;
+  border: none;
 }
 
-.close-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
+.clear-cart-btn {
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 11px;
+  color: #777;
+  cursor: pointer;
 }
 
-/* 카드에 마우스 올렸을 때 클릭 가능 표시 */
-.recipe-card {
-    cursor: pointer;
-    transition: transform 0.2s ease;
+.clear-cart-btn:hover {
+  background-color: #f5f5f5;
+  color: #333;
 }
 
-.recipe-card:hover {
-    transform: translateY(-5px);
+.move-cabinet-btn {
+  width: 100%;
+  margin-top: 16px;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background-color: #2ecc71;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.move-cabinet-btn:hover:not(:disabled) {
+  background-color: #27ae60;
+  transform: translateY(-1px);
+}
+
+.move-cabinet-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* 이미 내 술장에 보유 중인 카드 표시 */
+.sub-card.in-cabinet {
+  border-color: #3b82f6;
+  background-color: rgba(59, 130, 246, 0.06);
+}
+
+.sub-card.in-cabinet .select-badge {
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+
+/* [탭 2] 내 술장 전용 화면 스타일 */
+.my-cabinet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.go-browse-btn {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  background-color: #ff9800;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cat-pill {
+  font-size: 11px;
+  font-weight: 700;
+  background-color: #e0f2fe;
+  color: #0369a1;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-bottom: 6px;
+}
+
+.remove-cabinet-btn {
+  margin-top: 6px;
+  padding: 5px 10px;
+  border: 1px solid #fca5a5;
+  border-radius: 6px;
+  background-color: #fef2f2;
+  color: #dc2626;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.remove-cabinet-btn:hover {
+  background-color: #fee2e2;
+}
+
+.empty-cabinet-box {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 50px 20px;
+  border: 2px dashed #ddd;
+  border-radius: 12px;
+  color: #666;
+}
+
+.empty-cabinet-box p {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+/* 하단 알림 토스트 */
+.toast-msg {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background-color: #1f2937;
+  color: #ffffff;
+  padding: 12px 22px;
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.25s ease;
+  z-index: 9999;
+}
+
+.toast-msg.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* 다크모드 대응 */
+body.dark-mode .top-nav-tabs {
+  border-bottom-color: #444;
+}
+
+body.dark-mode .nav-tab-btn {
+  background-color: #2d2d2d;
+  color: #ccc;
+}
+
+body.dark-mode .nav-tab-btn.active {
+  background-color: #ff9800;
+  color: #fff;
+}
+
+body.dark-mode .cart-header {
+  border-bottom-color: #444;
+}
+
+body.dark-mode .clear-cart-btn {
+  border-color: #555;
+  color: #aaa;
+}
+
+body.dark-mode .empty-cabinet-box {
+  border-color: #444;
+  color: #aaa;
+}
+
+/* ==========================================
+   [탭 3] 친구 추가 & 친구 술장 보기 스타일
+   ========================================== */
+.friend-add-card {
+  background-color: #f8f9fa;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 24px;
+}
+
+.friend-add-form {
+  display: flex;
+  gap: 10px;
+}
+
+.friend-add-form input {
+  flex: 1;
+  padding: 11px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+}
+
+.friend-add-form input:focus {
+  border-color: #ff9800;
+}
+
+.friend-add-msg {
+  margin: 10px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.friend-add-msg.hidden {
+  display: none;
+}
+
+.friend-add-msg.error {
+  color: #ef4444;
+}
+
+.friend-add-msg.success {
+  color: #16a34a;
+}
+
+.friend-suggest-wrap {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed #d1d5db;
+}
+
+.friend-suggest-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.friend-suggest-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.friend-suggest-chip {
+  padding: 6px 12px;
+  border: 1px solid #ff9800;
+  border-radius: 20px;
+  background-color: rgba(255, 152, 0, 0.08);
+  color: #d97706;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.friend-suggest-chip:hover {
+  background-color: #ff9800;
+  color: #ffffff;
+}
+
+.friend-section-title {
+  margin: 0 0 12px;
+  font-size: 16px;
+}
+
+.friends-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 14px;
+}
+
+.friend-card {
+  background-color: #ffffff;
+  border: 2px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.friend-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.friend-card.active {
+  border-color: #ff9800;
+  background-color: rgba(255, 152, 0, 0.06);
+}
+
+.friend-card-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.friend-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ff9800;
+  flex-shrink: 0;
+}
+
+.friend-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.friend-info strong {
+  font-size: 15px;
+}
+
+.friend-info span {
+  font-size: 12px;
+  color: #777;
+}
+
+.friend-card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.friend-view-btn {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  border-radius: 8px;
+  background-color: #ff9800;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.friend-view-btn:hover {
+  background-color: #e68900;
+}
+
+.friend-delete-btn {
+  padding: 8px 12px;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  background-color: #fef2f2;
+  color: #dc2626;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.friend-delete-btn:hover {
+  background-color: #fee2e2;
+}
+
+/* 선택한 친구의 술장 상세 영역 */
+.friend-cabinet-section {
+  margin-top: 28px;
+  padding: 20px;
+  border-radius: 14px;
+  background-color: #f8f9fa;
+  border: 2px solid #ff9800;
+}
+
+.friend-cabinet-section.hidden {
+  display: none;
+}
+
+.friend-cabinet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.friend-cabinet-owner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.friend-owner-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ff9800;
+}
+
+.friend-cabinet-owner h3 {
+  margin: 0 0 2px;
+  font-size: 18px;
+}
+
+.friend-copy-liquor-btn {
+  margin-top: 4px;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 20px;
+  background-color: #ff9800;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.friend-copy-liquor-btn:hover {
+  background-color: #e68900;
+}
+
+/* 친구 기능 다크모드 대응 */
+body.dark-mode .friend-add-card,
+body.dark-mode .friend-cabinet-section {
+  background-color: #1e1e1e;
+  border-color: #444;
+}
+
+body.dark-mode .friend-cabinet-section {
+  border-color: #ff9800;
+}
+
+body.dark-mode .friend-add-form input {
+  background-color: #2a2a2a;
+  border-color: #555;
+  color: #ffffff;
+}
+
+body.dark-mode .friend-suggest-wrap,
+body.dark-mode .friend-cabinet-header {
+  border-color: #444;
+}
+
+body.dark-mode .friend-suggest-label,
+body.dark-mode .friend-info span {
+  color: #aaa;
+}
+
+body.dark-mode .friend-card {
+  background-color: #1e1e1e;
+  border-color: #444;
+  color: #f1f1f1;
+}
+
+body.dark-mode .friend-card.active {
+  border-color: #ff9800;
+  background-color: rgba(255, 152, 0, 0.12);
+}
+
+body.dark-mode .friend-suggest-chip {
+  color: #fbbf24;
+  border-color: #fbbf24;
+}
+
+/* ==========================================
+   [탭 4] AI 바텐더 & 사이트 외 술 추천 카드 스타일
+   ========================================== */
+.ai-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.ai-key-box {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.ai-key-box.hidden {
+  display: none;
+}
+
+.ai-key-box input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.ai-quick-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.ai-chip {
+  padding: 7px 14px;
+  border: 1px solid #ff9800;
+  border-radius: 20px;
+  background-color: rgba(255, 152, 0, 0.08);
+  color: #d97706;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ai-chip:hover {
+  background-color: #ff9800;
+  color: #ffffff;
+}
+
+.ai-chat-box {
+  height: 380px;
+  overflow-y: auto;
+  padding: 18px;
+  border-radius: 12px;
+  background-color: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ai-msg {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  max-width: 85%;
+}
+
+.ai-msg.user {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.ai-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #ff9800;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.ai-bubble {
+  padding: 12px 16px;
+  border-radius: 14px;
+  font-size: 14px;
+  line-height: 1.6;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  color: #222;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.ai-msg.user .ai-bubble {
+  background-color: #ff9800;
+  color: #ffffff;
+  border: none;
+}
+
+.ai-input-area {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.ai-input-area input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.ai-send-btn {
+  padding: 12px 22px;
+  border: none;
+  border-radius: 10px;
+  background-color: #ff9800;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ai-send-btn:hover {
+  background-color: #e68900;
+}
+
+/* AI 채팅창 내 사이트 외 술 추천 카드 */
+.ai-rec-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.ai-rec-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+}
+
+.ai-rec-item small {
+  color: #666;
+  font-size: 12px;
+}
+
+.ai-add-custom-btn {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  background-color: #2ecc71;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ai-add-custom-btn:disabled {
+  background-color: #9ca3af;
+  cursor: default;
+}
+
+/* 다크모드 대응 */
+body.dark-mode .ai-chat-box {
+  background-color: #1e1e1e;
+  border-color: #444;
+}
+
+body.dark-mode .ai-msg.bot .ai-bubble {
+  background-color: #2a2a2a;
+  border-color: #444;
+  color: #f1f1f1;
+}
+
+body.dark-mode .ai-input-area input,
+body.dark-mode .ai-key-box input {
+  background-color: #2a2a2a;
+  border-color: #555;
+  color: #fff;
+}
+
+body.dark-mode .ai-chip {
+  color: #fbbf24;
+  border-color: #fbbf24;
+}
+
+body.dark-mode .ai-rec-item {
+  background-color: #1f1f1f;
+  border-color: #444;
+}
+
+body.dark-mode .ai-rec-item small {
+  color: #aaa;
+}
+
+/* ==========================================
+   [첫 화면] 로그인 / 회원가입 게이트 스타일
+   ========================================== */
+.auth-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.auth-overlay.hidden {
+  display: none;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+  background-color: #ffffff;
+  border-radius: 18px;
+  padding: 32px 28px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+  text-align: center;
+}
+
+.auth-logo {
+  font-size: 26px;
+  font-weight: 800;
+  color: #ff9800;
+  letter-spacing: 0.5px;
+}
+
+.auth-subtitle {
+  margin: 6px 0 20px;
+  font-size: 13px;
+  color: #666;
+}
+
+.auth-tabs {
+  display: flex;
+  background-color: #f3f4f6;
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 18px;
+}
+
+.auth-tab {
+  flex: 1;
+  padding: 9px 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 700;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.auth-tab.active {
+  background-color: #ffffff;
+  color: #ff9800;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.auth-form.hidden {
+  display: none;
+}
+
+.auth-form input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+}
+
+.auth-form input:focus {
+  border-color: #ff9800;
+}
+
+.signup-avatar-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+#signup-avatar-preview {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #ff9800;
+}
+
+.avatar-upload-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #d97706;
+  background-color: rgba(255, 152, 0, 0.12);
+  padding: 5px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.auth-error {
+  margin: 0;
+  font-size: 12px;
+  color: #ef4444;
+  text-align: left;
+}
+
+.auth-error.hidden {
+  display: none;
+}
+
+.auth-submit-btn {
+  margin-top: 4px;
+  padding: 13px;
+  border: none;
+  border-radius: 10px;
+  background-color: #ff9800;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.auth-submit-btn:hover {
+  background-color: #e68900;
+}
+
+.auth-submit-btn.signup-btn {
+  background-color: #2ecc71;
+}
+
+.auth-submit-btn.signup-btn:hover {
+  background-color: #27ae60;
+}
+
+/* ==========================================
+   유튜브 스타일 우측 상단 프로필 버튼 & 카드
+   ========================================== */
+.header-area {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+}
+
+.profile-wrapper {
+  position: relative;
+}
+
+.profile-wrapper.hidden {
+  display: none;
+}
+
+.profile-trigger-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px 5px 6px;
+  border-radius: 999px;
+  border: 1px solid #ddd;
+  background-color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.header-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.header-nickname {
+  font-size: 13px;
+  font-weight: 700;
+  color: #222;
+}
+
+.profile-dropdown-card {
+  position: absolute;
+  top: 46px;
+  right: 0;
+  width: 270px;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.16);
+  z-index: 1000;
+}
+
+.profile-dropdown-card.hidden {
+  display: none;
+}
+
+.profile-card-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.profile-card-avatar-wrap {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+}
+
+.card-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ff9800;
+}
+
+.change-avatar-badge {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  border: 1px solid #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.profile-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.profile-card-info strong {
+  font-size: 15px;
+  color: #111;
+}
+
+.profile-card-info span {
+  font-size: 12px;
+  color: #777;
+}
+
+.profile-stat-pill {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #d97706;
+}
+
+.profile-divider {
+  border: none;
+  border-top: 1px solid #eee;
+  margin: 12px 0;
+}
+
+.logout-btn {
+  width: 100%;
+  padding: 9px;
+  border: none;
+  border-radius: 8px;
+  background-color: #f3f4f6;
+  color: #333;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+/* 다크모드 대응 */
+body.dark-mode .profile-trigger-btn,
+body.dark-mode .profile-dropdown-card {
+  background-color: #2a2a2a;
+  border-color: #444;
+}
+
+body.dark-mode .header-nickname,
+body.dark-mode .profile-card-info strong {
+  color: #f3f4f6;
+}
+
+body.dark-mode .profile-divider {
+  border-top-color: #444;
+}
+
+body.dark-mode .logout-btn {
+  background-color: #374151;
+  color: #f3f4f6;
+}
+
+/* ==========================================
+   친구 요청 수락/거절 & 오늘 마신 술(인스타 피드) 스타일
+   ========================================== */
+.friend-requests-box {
+  background-color: #fffbeb;
+  border: 2px solid #f59e0b;
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 20px;
+}
+
+.friend-requests-box.hidden {
+  display: none;
+}
+
+.friend-requests-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.friend-req-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  background-color: #ffffff;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+.friend-req-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.friend-req-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ff9800;
+}
+
+.friend-req-user div {
+  display: flex;
+  flex-direction: column;
+}
+
+.friend-req-user span {
+  font-size: 12px;
+  color: #777;
+}
+
+.friend-req-btns {
+  display: flex;
+  gap: 6px;
+}
+
+.req-accept-btn {
+  padding: 7px 14px;
+  border: none;
+  border-radius: 8px;
+  background-color: #2ecc71;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.req-accept-btn:hover {
+  background-color: #27ae60;
+}
+
+.req-reject-btn {
+  padding: 7px 12px;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  background-color: #fef2f2;
+  color: #dc2626;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.friend-suggest-chip.sent {
+  opacity: 0.65;
+  cursor: default;
+  border-color: #9ca3af;
+  color: #6b7280;
+  background-color: transparent;
+}
+
+/* [탭 4] 오늘 마신 술 (인스타 피드) */
+.feed-create-card {
+  max-width: 680px;
+  margin: 0 auto 28px;
+  background-color: #f8f9fa;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 18px;
+}
+
+.feed-form-top {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.feed-photo-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.feed-photo-preview {
+  width: 140px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 2px solid #ff9800;
+}
+
+.feed-photo-preview.hidden {
+  display: none;
+}
+
+.feed-photo-label {
+  display: inline-block;
+  padding: 10px 14px;
+  border: 1px dashed #ff9800;
+  border-radius: 10px;
+  background-color: rgba(255, 152, 0, 0.08);
+  color: #d97706;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+}
+
+.feed-inputs-col {
+  flex: 1;
+  min-width: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.feed-liquor-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.feed-liquor-row input {
+  flex: 1;
+  min-width: 160px;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.feed-cabinet-picker {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 13px;
+  background-color: #ffffff;
+}
+
+.feed-inputs-col textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.feed-submit-btn {
+  align-self: flex-end;
+}
+
+.feed-posts-list {
+  max-width: 680px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.insta-post-card {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+}
+
+.insta-post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+}
+
+.insta-author-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.insta-author-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ff9800;
+}
+
+.insta-author-info div {
+  display: flex;
+  flex-direction: column;
+}
+
+.insta-author-info strong {
+  font-size: 14px;
+}
+
+.insta-author-info span {
+  font-size: 12px;
+  color: #777;
+}
+
+.insta-delete-post-btn {
+  padding: 5px 10px;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  background-color: #fef2f2;
+  color: #dc2626;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.insta-post-img-wrap {
+  width: 100%;
+  background-color: #111827;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.insta-post-img {
+  width: 100%;
+  max-height: 440px;
+  object-fit: cover;
+  display: block;
+}
+
+.insta-post-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px 6px;
+}
+
+.insta-like-btn {
+  padding: 6px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  background-color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.insta-like-btn.liked {
+  border-color: #fda4af;
+  background-color: #fff1f2;
+  color: #e11d48;
+}
+
+.insta-comment-count {
+  font-size: 13px;
+  color: #555;
+}
+
+.insta-liked-by {
+  padding: 2px 16px 6px;
+  font-size: 12px;
+  color: #555;
+}
+
+.insta-post-content {
+  padding: 6px 16px 12px;
+}
+
+.insta-drink-badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #d97706;
+  background-color: #fef3c7;
+  padding: 3px 10px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+
+.insta-post-content p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.insta-comments-section {
+  border-top: 1px solid #f3f4f6;
+  padding: 12px 16px 14px;
+  background-color: #fafafa;
+}
+
+.insta-comment-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 13px;
+}
+
+.insta-comment-body strong {
+  margin-right: 6px;
+}
+
+.insta-comment-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #888;
+  flex-shrink: 0;
+}
+
+.insta-del-comment-btn {
+  border: none;
+  background: none;
+  color: #ef4444;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.insta-comment-form {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.insta-comment-form input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 20px;
+  font-size: 13px;
+  outline: none;
+}
+
+.insta-comment-form button {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 20px;
+  background-color: #ff9800;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* 다크모드 대응 */
+body.dark-mode .friend-requests-box {
+  background-color: #292215;
+  border-color: #d97706;
+}
+
+body.dark-mode .friend-req-item,
+body.dark-mode .feed-create-card,
+body.dark-mode .insta-post-card {
+  background-color: #1e1e1e;
+  border-color: #444;
+  color: #f1f1f1;
+}
+
+body.dark-mode .feed-liquor-row input,
+body.dark-mode .feed-cabinet-picker,
+body.dark-mode .feed-inputs-col textarea,
+body.dark-mode .insta-comment-form input {
+  background-color: #2a2a2a;
+  border-color: #555;
+  color: #ffffff;
+}
+
+body.dark-mode .insta-comments-section {
+  background-color: #181818;
+  border-top-color: #333;
+}
+
+body.dark-mode .insta-like-btn {
+  background-color: #2a2a2a;
+  border-color: #555;
+  color: #eee;
+}
+
+body.dark-mode .insta-like-btn.liked {
+  background-color: rgba(225, 29, 72, 0.2);
+  border-color: #fb7185;
+  color: #fda4af;
+}
+
+body.dark-mode .insta-author-info span,
+body.dark-mode .insta-comment-count,
+body.dark-mode .insta-liked-by,
+body.dark-mode .friend-req-user span {
+  color: #aaa;
+}
+
+/* ==========================================
+   관리자 계정 & 관리자 센터 스타일
+   ========================================== */
+.admin-role-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background-color: #ef4444;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.admin-role-badge.hidden {
+  display: none;
+}
+
+.global-notice-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 16px;
+  margin-bottom: 18px;
+  border-radius: 12px;
+  background-color: #fef3c7;
+  border: 1px solid #f59e0b;
+  color: #92400e;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.global-notice-banner.hidden {
+  display: none;
+}
+
+.notice-pill {
+  padding: 3px 8px;
+  border-radius: 8px;
+  background-color: #f59e0b;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.admin-liquor-panel {
+  background-color: #fef2f2;
+  border: 2px solid #ef4444;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.admin-liquor-panel.hidden {
+  display: none;
+}
+
+.admin-panel-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+  color: #b91c1c;
+}
+
+.admin-panel-title span {
+  font-size: 12px;
+  color: #7f1d1d;
+}
+
+.admin-add-liquor-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-add-liquor-form select,
+.admin-add-liquor-form input {
+  padding: 9px 12px;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  font-size: 13px;
+  background-color: #ffffff;
+}
+
+.admin-add-liquor-form input[id="admin-liq-desc"] {
+  flex: 1;
+  min-width: 180px;
+}
+
+.admin-img-upload-btn {
+  padding: 9px 12px;
+  border: 1px dashed #ef4444;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #dc2626;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-add-btn {
+  padding: 9px 16px;
+  border: none;
+  border-radius: 8px;
+  background-color: #ef4444;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-add-btn:hover {
+  background-color: #dc2626;
+}
+
+.admin-del-liquor-btn {
+  margin-top: 8px;
+  padding: 4px 10px;
+  border: 1px solid #fca5a5;
+  border-radius: 6px;
+  background-color: #fef2f2;
+  color: #dc2626;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-del-liquor-btn:hover {
+  background-color: #ef4444;
+  color: #ffffff;
+}
+
+.admin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.admin-stat-card {
+  background-color: #f8f9fa;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-stat-card span {
+  font-size: 13px;
+  color: #666;
+}
+
+.admin-stat-card strong {
+  font-size: 22px;
+  color: #ff9800;
+}
+
+.admin-section-card {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 18px;
+}
+
+.admin-section-card h3 {
+  margin: 0 0 8px;
+}
+
+.admin-users-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.admin-user-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+}
+
+.admin-user-row.banned {
+  background-color: #fef2f2;
+  border-color: #fca5a5;
+}
+
+.admin-user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-user-info div {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-user-info span {
+  font-size: 12px;
+  color: #777;
+}
+
+.banned-pill {
+  padding: 2px 6px;
+  border-radius: 6px;
+  background-color: #dc2626;
+  color: #fff;
+  font-size: 11px;
+}
+
+.admin-user-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.admin-ban-btn {
+  padding: 6px 12px;
+  border: 1px solid #f59e0b;
+  border-radius: 8px;
+  background-color: #fffbeb;
+  color: #b45309;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-del-user-btn {
+  padding: 6px 12px;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  background-color: #fef2f2;
+  color: #dc2626;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+body.dark-mode .admin-liquor-panel {
+  background-color: #2b1818;
+  border-color: #ef4444;
+}
+
+body.dark-mode .admin-panel-title,
+body.dark-mode .admin-panel-title span {
+  color: #fca5a5;
+}
+
+body.dark-mode .admin-add-liquor-form select,
+body.dark-mode .admin-add-liquor-form input,
+body.dark-mode .admin-img-upload-btn {
+  background-color: #2a2a2a;
+  border-color: #555;
+  color: #ffffff;
+}
+
+body.dark-mode .admin-stat-card,
+body.dark-mode .admin-section-card,
+body.dark-mode .admin-user-row {
+  background-color: #1e1e1e;
+  border-color: #444;
+}
+
+.nav-tab-btn.hidden {
+  display: none !important;
+}
+
+/* ==========================================
+   게스트 모드 & 잠금(🔒) UI 스타일
+   ========================================== */
+.guest-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 16px 0 12px;
+  color: #888;
+  font-size: 0.85rem;
+}
+.guest-divider::before,
+.guest-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #ddd;
+}
+.guest-divider span {
+  padding: 0 10px;
+}
+
+.guest-enter-btn {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px dashed #ff9800;
+  border-radius: 10px;
+  background: #fff8ee;
+  color: #d97706;
+  font-weight: 700;
+  font-size: 0.96rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.guest-enter-btn:hover {
+  background: #ff9800;
+  color: #fff;
+  border-style: solid;
+}
+
+.guest-sub-note {
+  margin: 8px 0 0;
+  font-size: 0.8rem;
+  color: #777;
+  text-align: center;
+}
+
+/* 상단 게스트 체험 배너 */
+.guest-mode-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: linear-gradient(90deg, #fff3cd, #ffe8a1);
+  border: 1px solid #f5c242;
+  color: #664d03;
+  padding: 10px 18px;
+  border-radius: 12px;
+  margin: 12px auto;
+  max-width: 1200px;
+  font-size: 0.9rem;
+}
+.guest-mode-banner.hidden {
+  display: none !important;
+}
+.guest-banner-btn {
+  background: #ff9800;
+  color: #fff;
+  border: none;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+.guest-banner-btn:hover {
+  background: #e68900;
+}
+
+/* 잠금 안내 카드 & 폼 잠금 */
+.guest-lock-box {
+  background: #f8f9fa;
+  border: 2px dashed #cbd5e1;
+  border-radius: 14px;
+  padding: 22px 18px;
+  text-align: center;
+  margin-bottom: 18px;
+  color: #475569;
+}
+.guest-lock-box h4 {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+  color: #1e293b;
+}
+.guest-lock-box p {
+  margin: 0 0 14px;
+  font-size: 0.9rem;
+}
+.guest-unlock-cta {
+  background: #ff9800;
+  color: #fff;
+  border: none;
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.guest-unlock-cta:hover {
+  background: #e68900;
+}
+
+.locked-section-dimmed {
+  opacity: 0.52;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* 피드 좋아요 / 댓글 잠금 */
+.insta-like-btn.locked-btn {
+  background: #f1f5f9 !important;
+  color: #94a3b8 !important;
+  border-color: #cbd5e1 !important;
+  cursor: not-allowed !important;
+}
+.insta-comment-form.locked-form input {
+  background: #f1f5f9;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+.insta-comment-form.locked-form button {
+  background: #cbd5e1 !important;
+  color: #64748b !important;
+  cursor: not-allowed !important;
+}
+
+/* 피드 검색 필터 바 */
+.feed-filter-bar {
+  margin-bottom: 16px;
+}
+.feed-filter-bar input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  box-sizing: border-box;
+}
+
+/* 다크모드 대응 */
+body.dark-mode .guest-enter-btn {
+  background: #2a2215;
+  color: #ffb74d;
+}
+body.dark-mode .guest-mode-banner {
+  background: linear-gradient(90deg, #332914, #3d3014);
+  border-color: #7c5e18;
+  color: #fde68a;
+}
+body.dark-mode .guest-lock-box {
+  background: #1e293b;
+  border-color: #475569;
+  color: #cbd5e1;
+}
+body.dark-mode .guest-lock-box h4 {
+  color: #f8fafc;
+}
+body.dark-mode .feed-filter-bar input {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
 }
