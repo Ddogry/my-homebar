@@ -2137,3 +2137,7 @@ body.dark-mode .admin-user-row {
   background-color: #1e1e1e;
   border-color: #444;
 }
+
+.nav-tab-btn.hidden {
+  display: none !important;
+}
