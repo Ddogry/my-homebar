@@ -1434,3 +1434,433 @@ body.dark-mode .logout-btn {
   background-color: #374151;
   color: #f3f4f6;
 }
+
+/* ==========================================
+   친구 요청 수락/거절 & 오늘 마신 술(인스타 피드) 스타일
+   ========================================== */
+.friend-requests-box {
+  background-color: #fffbeb;
+  border: 2px solid #f59e0b;
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 20px;
+}
+
+.friend-requests-box.hidden {
+  display: none;
+}
+
+.friend-requests-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.friend-req-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  background-color: #ffffff;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+.friend-req-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.friend-req-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ff9800;
+}
+
+.friend-req-user div {
+  display: flex;
+  flex-direction: column;
+}
+
+.friend-req-user span {
+  font-size: 12px;
+  color: #777;
+}
+
+.friend-req-btns {
+  display: flex;
+  gap: 6px;
+}
+
+.req-accept-btn {
+  padding: 7px 14px;
+  border: none;
+  border-radius: 8px;
+  background-color: #2ecc71;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.req-accept-btn:hover {
+  background-color: #27ae60;
+}
+
+.req-reject-btn {
+  padding: 7px 12px;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  background-color: #fef2f2;
+  color: #dc2626;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.friend-suggest-chip.sent {
+  opacity: 0.65;
+  cursor: default;
+  border-color: #9ca3af;
+  color: #6b7280;
+  background-color: transparent;
+}
+
+/* [탭 4] 오늘 마신 술 (인스타 피드) */
+.feed-create-card {
+  max-width: 680px;
+  margin: 0 auto 28px;
+  background-color: #f8f9fa;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 18px;
+}
+
+.feed-form-top {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.feed-photo-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.feed-photo-preview {
+  width: 140px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 2px solid #ff9800;
+}
+
+.feed-photo-preview.hidden {
+  display: none;
+}
+
+.feed-photo-label {
+  display: inline-block;
+  padding: 10px 14px;
+  border: 1px dashed #ff9800;
+  border-radius: 10px;
+  background-color: rgba(255, 152, 0, 0.08);
+  color: #d97706;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+}
+
+.feed-inputs-col {
+  flex: 1;
+  min-width: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.feed-liquor-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.feed-liquor-row input {
+  flex: 1;
+  min-width: 160px;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.feed-cabinet-picker {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 13px;
+  background-color: #ffffff;
+}
+
+.feed-inputs-col textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.feed-submit-btn {
+  align-self: flex-end;
+}
+
+.feed-posts-list {
+  max-width: 680px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.insta-post-card {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+}
+
+.insta-post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+}
+
+.insta-author-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.insta-author-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ff9800;
+}
+
+.insta-author-info div {
+  display: flex;
+  flex-direction: column;
+}
+
+.insta-author-info strong {
+  font-size: 14px;
+}
+
+.insta-author-info span {
+  font-size: 12px;
+  color: #777;
+}
+
+.insta-delete-post-btn {
+  padding: 5px 10px;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  background-color: #fef2f2;
+  color: #dc2626;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.insta-post-img-wrap {
+  width: 100%;
+  background-color: #111827;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.insta-post-img {
+  width: 100%;
+  max-height: 440px;
+  object-fit: cover;
+  display: block;
+}
+
+.insta-post-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px 6px;
+}
+
+.insta-like-btn {
+  padding: 6px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  background-color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.insta-like-btn.liked {
+  border-color: #fda4af;
+  background-color: #fff1f2;
+  color: #e11d48;
+}
+
+.insta-comment-count {
+  font-size: 13px;
+  color: #555;
+}
+
+.insta-liked-by {
+  padding: 2px 16px 6px;
+  font-size: 12px;
+  color: #555;
+}
+
+.insta-post-content {
+  padding: 6px 16px 12px;
+}
+
+.insta-drink-badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #d97706;
+  background-color: #fef3c7;
+  padding: 3px 10px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+
+.insta-post-content p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.insta-comments-section {
+  border-top: 1px solid #f3f4f6;
+  padding: 12px 16px 14px;
+  background-color: #fafafa;
+}
+
+.insta-comment-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 13px;
+}
+
+.insta-comment-body strong {
+  margin-right: 6px;
+}
+
+.insta-comment-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #888;
+  flex-shrink: 0;
+}
+
+.insta-del-comment-btn {
+  border: none;
+  background: none;
+  color: #ef4444;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.insta-comment-form {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.insta-comment-form input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 20px;
+  font-size: 13px;
+  outline: none;
+}
+
+.insta-comment-form button {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 20px;
+  background-color: #ff9800;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* 다크모드 대응 */
+body.dark-mode .friend-requests-box {
+  background-color: #292215;
+  border-color: #d97706;
+}
+
+body.dark-mode .friend-req-item,
+body.dark-mode .feed-create-card,
+body.dark-mode .insta-post-card {
+  background-color: #1e1e1e;
+  border-color: #444;
+  color: #f1f1f1;
+}
+
+body.dark-mode .feed-liquor-row input,
+body.dark-mode .feed-cabinet-picker,
+body.dark-mode .feed-inputs-col textarea,
+body.dark-mode .insta-comment-form input {
+  background-color: #2a2a2a;
+  border-color: #555;
+  color: #ffffff;
+}
+
+body.dark-mode .insta-comments-section {
+  background-color: #181818;
+  border-top-color: #333;
+}
+
+body.dark-mode .insta-like-btn {
+  background-color: #2a2a2a;
+  border-color: #555;
+  color: #eee;
+}
+
+body.dark-mode .insta-like-btn.liked {
+  background-color: rgba(225, 29, 72, 0.2);
+  border-color: #fb7185;
+  color: #fda4af;
+}
+
+body.dark-mode .insta-author-info span,
+body.dark-mode .insta-comment-count,
+body.dark-mode .insta-liked-by,
+body.dark-mode .friend-req-user span {
+  color: #aaa;
+}

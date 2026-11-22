@@ -88,6 +88,9 @@
     <button class="nav-tab-btn" id="tab-friends" data-target="view-friends">
       👥 친구 술장 <span id="friends-badge" class="tab-count-badge">0</span>
     </button>
+    <button class="nav-tab-btn" id="tab-feed" data-target="view-feed">
+      📸 오늘 마신 술 <span id="feed-badge" class="tab-count-badge">0</span>
+    </button>
     <button class="nav-tab-btn" id="tab-ai" data-target="view-ai">
       🤖 AI 바텐더
     </button>
@@ -166,36 +169,38 @@
       </div>
       <button id="go-browse-btn" class="go-browse-btn">+ 술 더 담으러 가기</button>
     </div>
-
-    <div id="my-cabinet-grid" class="sub-liquor-grid"></div>
-  </div>
-
-  <!-- [탭 3] 친구 추가 & 친구 술장 구경하기 화면 -->
+<!-- [탭 3] 친구 요청/수락 & 친구 술장 구경하기 화면 -->
   <div id="view-friends" class="tab-view hidden">
     <div class="my-cabinet-header">
       <div>
-        <h2>👥 친구 목록 & 술장 구경</h2>
-        <p class="guide-text">친구 아이디를 추가하고, 친구의 홈바 술장에 어떤 술이 있는지 구경해 보세요!</p>
+        <h2>👥 친구 관리 & 술장 구경</h2>
+        <p class="guide-text">친구 요청을 보내고, 상대방이 수락하면 서로의 술장과 '오늘 마신 술' 게시물을 볼 수 있어요!</p>
       </div>
     </div>
 
-    <!-- 친구 추가 입력 영역 -->
+    <!-- 받은 친구 요청 (수락 / 거절) 영역 -->
+    <div id="friend-requests-box" class="friend-requests-box hidden">
+      <h3 class="friend-section-title">📩 받은 친구 요청 (<span id="friend-req-count">0</span>건)</h3>
+      <div id="friend-requests-list" class="friend-requests-list"></div>
+    </div>
+
+    <!-- 친구 요청 보내기 영역 -->
     <div class="friend-add-card">
       <form id="friend-add-form" class="friend-add-form">
         <input
           type="text"
           id="friend-search-input"
-          placeholder="추가할 친구의 아이디 입력 (예: bartender_kim)"
+          placeholder="친구 요청 보낼 아이디 입력 (예: whiskey_lover)"
           autocomplete="off"
           required
         />
-        <button type="submit" class="go-browse-btn">+ 친구 추가</button>
+        <button type="submit" class="go-browse-btn">📨 친구 요청 보내기</button>
       </form>
       <p id="friend-add-msg" class="friend-add-msg hidden"></p>
 
-      <!-- 바로 추가 가능한 가입 회원 추천 목록 -->
+      <!-- 요청 가능한 가입 회원 추천 목록 -->
       <div class="friend-suggest-wrap">
-        <span class="friend-suggest-label">💡 추가 가능한 회원 (클릭 시 바로 추가):</span>
+        <span class="friend-suggest-label">💡 가입된 회원 (클릭 시 친구 요청 전송):</span>
         <div id="friend-suggest-list" class="friend-suggest-list"></div>
       </div>
     </div>
@@ -219,6 +224,53 @@
 
       <div id="friend-cabinet-grid" class="sub-liquor-grid"></div>
     </div>
+  </div>
+
+  <!-- [탭 4] 오늘 마신 술 (인스타그램 스타일 피드) -->
+  <div id="view-feed" class="tab-view hidden">
+    <div class="my-cabinet-header">
+      <div>
+        <h2>📸 오늘 마신 술</h2>
+        <p class="guide-text">오늘 마신 술과 한줄 기록을 올리고, 친구들의 게시물에 좋아요와 댓글을 남겨보세요!</p>
+      </div>
+    </div>
+
+    <!-- 게시글 작성 카드 -->
+    <div class="feed-create-card">
+      <form id="feed-post-form" class="feed-post-form">
+        <div class="feed-form-top">
+          <div class="feed-photo-box">
+            <img id="feed-photo-preview" src="" alt="게시물 미리보기" class="feed-photo-preview hidden" />
+            <label for="feed-photo-input" class="feed-photo-label">📷 술 사진 첨부 (선택)</label>
+            <input type="file" id="feed-photo-input" accept="image/*" hidden />
+          </div>
+
+          <div class="feed-inputs-col">
+            <div class="feed-liquor-row">
+              <input
+                type="text"
+                id="feed-liquor-name"
+                placeholder="오늘 마신 술 이름 (예: 맥캘란 12년 하이볼)"
+                required
+              />
+              <select id="feed-cabinet-picker" class="feed-cabinet-picker" title="내 술장에서 불러오기">
+                <option value="">🗄️ 내 술장에서 선택</option>
+              </select>
+            </div>
+            <textarea
+              id="feed-caption"
+              rows="2"
+              placeholder="오늘의 맛, 분위기, 안주 조합 등 한줄 감상을 남겨보세요!"
+              required
+            ></textarea>
+            <button type="submit" class="go-browse-btn feed-submit-btn">✨ 게시물 올리기</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- 피드 타임라인 -->
+    <div id="feed-posts-list" class="feed-posts-list"></div>
   </div>
 
   <!-- [탭 4] AI 바텐더 화면 -->
@@ -684,8 +736,10 @@
     if (typeof updateCabinetCount === 'function') updateCabinetCount();
     if (typeof renderCartList === 'function') renderCartList();
     if (typeof renderMyCabinet === 'function') renderMyCabinet();
+   if (typeof seedDemoRequestForUser === 'function') seedDemoRequestForUser(user.id);
     if (typeof updateFriendsBadge === 'function') updateFriendsBadge();
     if (typeof renderFriendsView === 'function') renderFriendsView();
+    if (typeof renderFeedView === 'function') renderFeedView();
   }
 
   profileTriggerBtn.addEventListener('click', (e) => {
@@ -772,6 +826,9 @@
     }
     if (targetId === 'view-friends') {
       renderFriendsView();
+    }
+    if (targetId === 'view-feed') {
+      renderFeedView();
     }
   }
 
@@ -948,10 +1005,14 @@
   }
 
   // ==========================================
-  // [탭 3] 친구 추가 & 친구 술장 구경하기 시스템
+ // ==========================================
+  // [탭 3] 친구 요청/수락 & 친구 술장 구경하기 시스템
   // ==========================================
   const friendsBadgeEl = document.getElementById('friends-badge');
   const friendsTotalCountEl = document.getElementById('friends-total-count');
+  const friendRequestsBox = document.getElementById('friend-requests-box');
+  const friendReqCountEl = document.getElementById('friend-req-count');
+  const friendRequestsListEl = document.getElementById('friend-requests-list');
   const friendAddForm = document.getElementById('friend-add-form');
   const friendSearchInput = document.getElementById('friend-search-input');
   const friendAddMsgEl = document.getElementById('friend-add-msg');
@@ -967,7 +1028,15 @@
 
   let selectedFriendId = null;
 
-  // 처음 테스트용 기본 예시 친구 계정 & 술장 데이터 자동 생성 (기존 데이터는 유지)
+  function escapeHTML(str) {
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  // 예시 친구 계정 & 초기 피드 게시물 생성
   function seedDemoFriends() {
     const users = getUsersDB();
     const demoAccounts = [
@@ -1021,25 +1090,54 @@
     });
 
     if (changed) saveUsersDB(users);
+    seedDemoPosts();
   }
 
-  // 현재 로그인한 유저의 친구 ID 목록 불러오기/저장하기
-  function getMyFriendIds() {
-    if (!currentUser) return [];
+  // 처음 접속 시 바로 '수락' 버튼을 테스트해 볼 수 있도록 예시 친구 요청 1건 생성
+  function seedDemoRequestForUser(userId) {
+    if (!userId || userId === 'bartender_kim') return;
+    const flagKey = `myHomebarDemoReqSeeded_${userId}`;
+    if (localStorage.getItem(flagKey)) return;
+
+    const friends = getFriendIdsByUser(userId);
+    const reqs = getIncomingRequests(userId);
+    if (!friends.includes('bartender_kim') && !reqs.some(r => r.fromId === 'bartender_kim')) {
+      reqs.push({ fromId: 'bartender_kim', createdAt: '방금 전' });
+      saveIncomingRequests(userId, reqs);
+    }
+    localStorage.setItem(flagKey, '1');
+  }
+
+  function getFriendIdsByUser(userId) {
     try {
-      return JSON.parse(localStorage.getItem(`myHomebarFriends_${currentUser.id}`) || '[]');
+      return JSON.parse(localStorage.getItem(`myHomebarFriends_${userId}`) || '[]');
     } catch (e) {
       return [];
     }
   }
 
-  function saveMyFriendIds(friendIds) {
-    if (!currentUser) return;
-    localStorage.setItem(`myHomebarFriends_${currentUser.id}`, JSON.stringify(friendIds));
-    updateFriendsBadge();
+  function saveFriendIdsByUser(userId, friendIds) {
+    localStorage.setItem(`myHomebarFriends_${userId}`, JSON.stringify(friendIds));
+    if (currentUser && currentUser.id === userId) updateFriendsBadge();
   }
 
-  // 특정 유저의 술장 배열 가져오기
+  function getMyFriendIds() {
+    return currentUser ? getFriendIdsByUser(currentUser.id) : [];
+  }
+
+  function getIncomingRequests(userId) {
+    try {
+      return JSON.parse(localStorage.getItem(`myHomebarFriendRequests_${userId}`) || '[]');
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveIncomingRequests(userId, reqList) {
+    localStorage.setItem(`myHomebarFriendRequests_${userId}`, JSON.stringify(reqList));
+    if (currentUser && currentUser.id === userId) updateFriendsBadge();
+  }
+
   function getUserCabinetById(userId) {
     try {
       return JSON.parse(localStorage.getItem(`myHomebarCabinet_${userId}`) || '[]');
@@ -1049,9 +1147,13 @@
   }
 
   function updateFriendsBadge() {
-    const count = getMyFriendIds().length;
-    if (friendsBadgeEl) friendsBadgeEl.textContent = count;
-    if (friendsTotalCountEl) friendsTotalCountEl.textContent = count;
+    if (!currentUser) return;
+    const friendCount = getMyFriendIds().length;
+    const reqCount = getIncomingRequests(currentUser.id).length;
+    if (friendsBadgeEl) {
+      friendsBadgeEl.textContent = reqCount > 0 ? `${friendCount} · +${reqCount}` : friendCount;
+    }
+    if (friendsTotalCountEl) friendsTotalCountEl.textContent = friendCount;
   }
 
   function showFriendMessage(text, isError = false) {
@@ -1060,14 +1162,14 @@
     friendAddMsgEl.classList.add(isError ? 'error' : 'success');
   }
 
-  // 친구 추가 공통 함수
-  function addFriendById(rawId) {
+  // 친구 요청 보내기 (상대방이 수락해야 친구 성립)
+  function sendFriendRequest(rawId) {
     if (!currentUser) return;
     const targetId = rawId.trim();
     if (!targetId) return;
 
     if (targetId === currentUser.id) {
-      showFriendMessage('⚠️ 자기 자신은 친구로 추가할 수 없습니다.', true);
+      showFriendMessage('⚠️ 자기 자신에게는 친구 요청을 보낼 수 없습니다.', true);
       return;
     }
 
@@ -1078,28 +1180,125 @@
       return;
     }
 
-    const friendIds = getMyFriendIds();
-    if (friendIds.includes(targetId)) {
-      showFriendMessage(`ℹ️ '${targetUser.nickname}(@${targetId})'님은 이미 친구 목록에 있습니다.`, true);
+    const myFriends = getMyFriendIds();
+    if (myFriends.includes(targetId)) {
+      showFriendMessage(`ℹ️ '${targetUser.nickname}(@${targetId})'님은 이미 친구입니다.`, true);
       return;
     }
 
-    friendIds.push(targetId);
-    saveMyFriendIds(friendIds);
-    friendSearchInput.value = '';
-    showFriendMessage(`✅ '${targetUser.nickname}(@${targetId})'님을 친구로 추가했습니다!`, false);
-    showToast(`👥 ${targetUser.nickname}님이 친구로 추가되었습니다!`);
+    // 상대방이 이미 나에게 요청을 보낸 상태라면 즉시 수락 처리
+    const myIncoming = getIncomingRequests(currentUser.id);
+    if (myIncoming.some(r => r.fromId === targetId)) {
+      acceptFriendRequest(targetId);
+      friendSearchInput.value = '';
+      showFriendMessage(`🎉 '${targetUser.nickname}(@${targetId})'님이 보낸 요청을 수락해 친구가 되었습니다!`, false);
+      return;
+    }
 
+    // 상대방의 받은 요청 목록 확인
+    const targetIncoming = getIncomingRequests(targetId);
+    if (targetIncoming.some(r => r.fromId === currentUser.id)) {
+      showFriendMessage(`⏳ '${targetUser.nickname}(@${targetId})'님에게 이미 친구 요청을 보냈습니다. 수락을 기다려 주세요!`, true);
+      return;
+    }
+
+    targetIncoming.push({
+      fromId: currentUser.id,
+      createdAt: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
+    });
+    saveIncomingRequests(targetId, targetIncoming);
+
+    friendSearchInput.value = '';
+    showFriendMessage(`📨 '${targetUser.nickname}(@${targetId})'님에게 친구 요청을 보냈습니다! 상대방이 수락하면 친구가 됩니다.`, false);
+    showToast(`📨 ${targetUser.nickname}님에게 친구 요청을 보냈습니다!`);
     renderFriendsView();
-    openFriendCabinet(targetId);
+  }
+
+  // 받은 친구 요청 수락 (양쪽 친구 목록에 동시 등록)
+  function acceptFriendRequest(fromId) {
+    if (!currentUser) return;
+    const users = getUsersDB();
+    const sender = users[fromId];
+
+    // 1. 내 받은 요청에서 제거
+    const updatedIncoming = getIncomingRequests(currentUser.id).filter(r => r.fromId !== fromId);
+    saveIncomingRequests(currentUser.id, updatedIncoming);
+
+    // 2. 내 친구 목록에 추가
+    const myFriends = getFriendIdsByUser(currentUser.id);
+    if (!myFriends.includes(fromId)) {
+      myFriends.push(fromId);
+      saveFriendIdsByUser(currentUser.id, myFriends);
+    }
+
+    // 3. 상대방 친구 목록에도 나 추가
+    const theirFriends = getFriendIdsByUser(fromId);
+    if (!theirFriends.includes(currentUser.id)) {
+      theirFriends.push(currentUser.id);
+      saveFriendIdsByUser(fromId, theirFriends);
+    }
+
+    showToast(`🤝 ${sender ? sender.nickname : fromId}님과 친구가 되었습니다!`);
+    renderFriendsView();
+    if (typeof renderFeedView === 'function') renderFeedView();
+  }
+
+  // 받은 친구 요청 거절
+  function rejectFriendRequest(fromId) {
+    if (!currentUser) return;
+    const updatedIncoming = getIncomingRequests(currentUser.id).filter(r => r.fromId !== fromId);
+    saveIncomingRequests(currentUser.id, updatedIncoming);
+    showToast('친구 요청을 거절했습니다.');
+    renderFriendsView();
   }
 
   friendAddForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    addFriendById(friendSearchInput.value);
+    sendFriendRequest(friendSearchInput.value);
   });
 
-  // 추가 가능한 회원 칩 렌더링
+  // 받은 친구 요청 목록 렌더링
+  function renderIncomingRequests() {
+    if (!currentUser) return;
+    const users = getUsersDB();
+    const requests = getIncomingRequests(currentUser.id);
+
+    friendReqCountEl.textContent = requests.length;
+    friendRequestsListEl.innerHTML = '';
+
+    if (requests.length === 0) {
+      friendRequestsBox.classList.add('hidden');
+      return;
+    }
+
+    friendRequestsBox.classList.remove('hidden');
+    requests.forEach(req => {
+      const sender = users[req.fromId];
+      if (!sender) return;
+
+      const row = document.createElement('div');
+      row.className = 'friend-req-item';
+      row.innerHTML = `
+        <div class="friend-req-user">
+          <img src="${sender.avatar || createDefaultAvatar(sender.nickname)}" alt="${escapeHTML(sender.nickname)}" class="friend-req-avatar" />
+          <div>
+            <strong>${escapeHTML(sender.nickname)}</strong>
+            <span>@${escapeHTML(sender.id)} · ${escapeHTML(req.createdAt || '')}</span>
+          </div>
+        </div>
+        <div class="friend-req-btns">
+          <button type="button" class="req-accept-btn">✅ 수락</button>
+          <button type="button" class="req-reject-btn">❌ 거절</button>
+        </div>
+      `;
+
+      row.querySelector('.req-accept-btn').addEventListener('click', () => acceptFriendRequest(req.fromId));
+      row.querySelector('.req-reject-btn').addEventListener('click', () => rejectFriendRequest(req.fromId));
+      friendRequestsListEl.appendChild(row);
+    });
+  }
+
+  // 요청 가능한 회원 칩 렌더링
   function renderSuggestedFriends() {
     if (!currentUser) return;
     const users = getUsersDB();
@@ -1112,12 +1311,16 @@
       return;
     }
 
-    candidates.slice(0, 6).forEach(user => {
+    candidates.slice(0, 8).forEach(user => {
+      const alreadySent = getIncomingRequests(user.id).some(r => r.fromId === currentUser.id);
       const chip = document.createElement('button');
       chip.type = 'button';
-      chip.className = 'friend-suggest-chip';
-      chip.textContent = `+ ${user.nickname} (@${user.id})`;
-      chip.addEventListener('click', () => addFriendById(user.id));
+      chip.className = `friend-suggest-chip ${alreadySent ? 'sent' : ''}`;
+      chip.disabled = alreadySent;
+      chip.textContent = alreadySent
+        ? `⏳ 수락 대기중 (${user.nickname})`
+        : `📨 ${user.nickname} (@${user.id})`;
+      chip.addEventListener('click', () => sendFriendRequest(user.id));
       friendSuggestListEl.appendChild(chip);
     });
   }
@@ -1125,6 +1328,7 @@
   // 내 친구 목록 카드 렌더링
   function renderFriendsView() {
     updateFriendsBadge();
+    renderIncomingRequests();
     renderSuggestedFriends();
 
     const users = getUsersDB();
@@ -1134,8 +1338,8 @@
     if (friendIds.length === 0) {
       friendsListGridEl.innerHTML = `
         <div class="empty-cabinet-box">
-          <p>아직 등록된 친구가 없습니다.</p>
-          <span>위에서 친구 아이디를 입력하거나 추천 회원을 클릭해 친구를 추가해 보세요!</span>
+          <p>아직 수락된 친구가 없습니다.</p>
+          <span>위에서 받은 친구 요청을 수락하거나, 다른 회원에게 친구 요청을 보내보세요!</span>
         </div>
       `;
       friendCabinetSection.classList.add('hidden');
@@ -1153,16 +1357,16 @@
       card.className = `friend-card ${isSelected ? 'active' : ''}`;
       card.innerHTML = `
         <div class="friend-card-top">
-          <img src="${friend.avatar || createDefaultAvatar(friend.nickname)}" alt="${friend.nickname}" class="friend-avatar" />
+          <img src="${friend.avatar || createDefaultAvatar(friend.nickname)}" alt="${escapeHTML(friend.nickname)}" class="friend-avatar" />
           <div class="friend-info">
-            <strong>${friend.nickname}</strong>
-            <span>@${friend.id}</span>
+            <strong>${escapeHTML(friend.nickname)}</strong>
+            <span>@${escapeHTML(friend.id)}</span>
             <small class="profile-stat-pill">🗄️ 보유 술장: <b>${friendCabinet.length}</b>병</small>
           </div>
         </div>
         <div class="friend-card-actions">
           <button type="button" class="friend-view-btn">🍸 술장 보기</button>
-          <button type="button" class="friend-delete-btn">삭제</button>
+          <button type="button" class="friend-delete-btn">친구 끊기</button>
         </div>
       `;
 
@@ -1175,14 +1379,15 @@
 
       card.querySelector('.friend-delete-btn').addEventListener('click', (e) => {
         e.stopPropagation();
-        const updated = getMyFriendIds().filter(id => id !== fid);
-        saveMyFriendIds(updated);
+        saveFriendIdsByUser(currentUser.id, getMyFriendIds().filter(id => id !== fid));
+        saveFriendIdsByUser(fid, getFriendIdsByUser(fid).filter(id => id !== currentUser.id));
         if (selectedFriendId === fid) {
           selectedFriendId = null;
           friendCabinetSection.classList.add('hidden');
         }
         renderFriendsView();
-        showToast(`🗑️ '${friend.nickname}'님을 친구 목록에서 삭제했습니다.`);
+        if (typeof renderFeedView === 'function') renderFeedView();
+        showToast(`🗑️ '${friend.nickname}'님과 친구를 끊었습니다.`);
       });
 
       friendsListGridEl.appendChild(card);
@@ -1215,7 +1420,7 @@
     if (friendItems.length === 0) {
       friendCabinetGridEl.innerHTML = `
         <div class="empty-cabinet-box">
-          <p>${friend.nickname}님의 술장이 아직 비어 있습니다.</p>
+          <p>${escapeHTML(friend.nickname)}님의 술장이 아직 비어 있습니다.</p>
           <span>친구가 술을 담으면 이곳에서 실시간으로 확인할 수 있어요!</span>
         </div>
       `;
@@ -1238,10 +1443,10 @@
 
         liquorCard.innerHTML = `
           <span class="cat-pill">${catName}</span>
-          <img src="${item.img}" alt="${item.name}" onerror="this.onerror=null; this.src='${fallback}';" />
-          <h4>${item.name}</h4>
-          <span class="abv-badge">도수 ${item.abv}</span>
-          <p>${item.desc}</p>
+          <img src="${item.img}" alt="${escapeHTML(item.name)}" onerror="this.onerror=null; this.src='${fallback}';" />
+          <h4>${escapeHTML(item.name)}</h4>
+          <span class="abv-badge">도수 ${escapeHTML(item.abv)}</span>
+          <p>${escapeHTML(item.desc)}</p>
           ${actionHtml}
         `;
 
@@ -1281,6 +1486,346 @@
     friendCabinetSection.classList.add('hidden');
     renderFriendsCardActiveState();
   });
+
+  // ==========================================
+  // [탭 4] 오늘 마신 술 (인스타 피드 + 좋아요 + 댓글)
+  // ==========================================
+  const feedBadgeEl = document.getElementById('feed-badge');
+  const feedPostForm = document.getElementById('feed-post-form');
+  const feedPhotoInput = document.getElementById('feed-photo-input');
+  const feedPhotoPreview = document.getElementById('feed-photo-preview');
+  const feedLiquorNameInput = document.getElementById('feed-liquor-name');
+  const feedCabinetPicker = document.getElementById('feed-cabinet-picker');
+  const feedCaptionInput = document.getElementById('feed-caption');
+  const feedPostsListEl = document.getElementById('feed-posts-list');
+
+  let pendingFeedPhoto = '';
+
+  function getPostsDB() {
+    try {
+      return JSON.parse(localStorage.getItem('myHomebarPosts') || '[]');
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function savePostsDB(posts) {
+    localStorage.setItem('myHomebarPosts', JSON.stringify(posts));
+  }
+
+  // 사진 미첨부 시 자동으로 감성 술 카드 이미지 생성
+  function createDrinkPostImage(liquorName) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 600;
+    canvas.height = 360;
+    const ctx = canvas.getContext('2d');
+
+    const grad = ctx.createLinearGradient(0, 0, 600, 360);
+    grad.addColorStop(0, '#1f2937');
+    grad.addColorStop(1, '#78350f');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 600, 360);
+
+    ctx.fillStyle = '#fbbf24';
+    ctx.font = 'bold 20px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText("🍸 TODAY'S DRINK", 300, 130);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 30px sans-serif';
+    const title = (liquorName || '오늘의 한 잔').slice(0, 22);
+    ctx.fillText(title, 300, 195);
+
+    ctx.fillStyle = '#d1d5db';
+    ctx.font = '16px sans-serif';
+    ctx.fillText('MY HOMEBAR JOURNAL', 300, 245);
+
+    return canvas.toDataURL('image/jpeg', 0.85);
+  }
+
+  // 게시물 사진 비율 유지 리사이징
+  function resizePostPhotoFile(file) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const maxDim = 640;
+          let w = img.width;
+          let h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) {
+              h = Math.round((h * maxDim) / w);
+              w = maxDim;
+            } else {
+              w = Math.round((w * maxDim) / h);
+              h = maxDim;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', 0.8));
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // 예시 친구들의 초기 게시물 생성
+  function seedDemoPosts() {
+    if (localStorage.getItem('myHomebarPostsSeeded')) return;
+    const existing = getPostsDB();
+    if (existing.length === 0) {
+      const demoPosts = [
+        {
+          id: 'post_demo_1',
+          authorId: 'bartender_kim',
+          liquorName: '탱커레이 진토닉',
+          caption: '퇴근 후 라임 듬뿍 넣은 탱커레이 진토닉 한 잔! 주니퍼베리 향이 피로를 싹 날려주네요 🍋',
+          image: createDrinkPostImage('탱커레이 진토닉'),
+          createdAt: '오늘 오후 8:15',
+          likes: ['whiskey_lover'],
+          comments: [
+            { id: 'c_demo_1', authorId: 'whiskey_lover', text: '진토닉 황금비율 부럽습니다!', createdAt: '오후 8:20' }
+          ]
+        },
+        {
+          id: 'post_demo_2',
+          authorId: 'whiskey_lover',
+          liquorName: '맥캘란 12년 더블 캐스크',
+          caption: '비 오는 날엔 역시 달달한 셰리 위스키 온더락이 최고입니다 🥃 다크초콜릿이랑 찰떡궁합!',
+          image: createDrinkPostImage('맥캘란 12년 더블 캐스크'),
+          createdAt: '어제 오후 10:40',
+          likes: ['bartender_kim'],
+          comments: []
+        }
+      ];
+      savePostsDB(demoPosts);
+    }
+    localStorage.setItem('myHomebarPostsSeeded', '1');
+  }
+
+  feedPhotoInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    pendingFeedPhoto = await resizePostPhotoFile(file);
+    feedPhotoPreview.src = pendingFeedPhoto;
+    feedPhotoPreview.classList.remove('hidden');
+  });
+
+  // 내 술장 선택 드롭다운 채우기
+  function updateFeedCabinetPicker() {
+    if (!feedCabinetPicker) return;
+    feedCabinetPicker.innerHTML = '<option value="">🗄️ 내 술장에서 선택</option>';
+    myCabinet.forEach(item => {
+      const opt = document.createElement('option');
+      opt.value = item.name;
+      opt.textContent = `${item.name} (${item.abv})`;
+      feedCabinetPicker.appendChild(opt);
+    });
+  }
+
+  feedCabinetPicker.addEventListener('change', () => {
+    if (feedCabinetPicker.value) {
+      feedLiquorNameInput.value = feedCabinetPicker.value;
+    }
+  });
+
+  // 새 게시글 올리기
+  feedPostForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (!currentUser) return;
+
+    const liquorName = feedLiquorNameInput.value.trim();
+    const caption = feedCaptionInput.value.trim();
+    if (!liquorName || !caption) return;
+
+    const posts = getPostsDB();
+    const newPost = {
+      id: 'post_' + Date.now(),
+      authorId: currentUser.id,
+      liquorName,
+      caption,
+      image: pendingFeedPhoto || createDrinkPostImage(liquorName),
+      createdAt: new Date().toLocaleString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+      likes: [],
+      comments: []
+    };
+
+    posts.unshift(newPost);
+    savePostsDB(posts);
+
+    pendingFeedPhoto = '';
+    feedPostForm.reset();
+    feedPhotoPreview.classList.add('hidden');
+    feedPhotoPreview.src = '';
+
+    renderFeedView();
+    showToast('📸 오늘 마신 술 게시물이 등록되었습니다!');
+  });
+
+  // 피드 화면 렌더링 (나 + 수락된 친구들의 게시물만 표시)
+  function renderFeedView() {
+    if (!currentUser) return;
+    updateFeedCabinetPicker();
+
+    const users = getUsersDB();
+    const visibleAuthors = new Set([currentUser.id, ...getMyFriendIds()]);
+    const allPosts = getPostsDB();
+    const feedPosts = allPosts.filter(p => visibleAuthors.has(p.authorId));
+
+    if (feedBadgeEl) feedBadgeEl.textContent = feedPosts.length;
+    feedPostsListEl.innerHTML = '';
+
+    if (feedPosts.length === 0) {
+      feedPostsListEl.innerHTML = `
+        <div class="empty-cabinet-box">
+          <p>아직 올라온 '오늘 마신 술' 게시물이 없습니다.</p>
+          <span>위에서 첫 게시물을 올리거나, 친구 요청을 수락해 친구의 술 기록을 구경해 보세요!</span>
+        </div>
+      `;
+      return;
+    }
+
+    feedPosts.forEach(post => {
+      const author = users[post.authorId] || { id: post.authorId, nickname: post.authorId };
+      const isMyPost = post.authorId === currentUser.id;
+      const likes = Array.isArray(post.likes) ? post.likes : [];
+      const comments = Array.isArray(post.comments) ? post.comments : [];
+      const isLiked = likes.includes(currentUser.id);
+
+      const likedNames = likes
+        .map(uid => (users[uid] ? users[uid].nickname : uid))
+        .slice(0, 3)
+        .join(', ');
+
+      const card = document.createElement('article');
+      card.className = 'insta-post-card';
+
+      const commentsHtml = comments.map(c => {
+        const cUser = users[c.authorId] || { nickname: c.authorId };
+        const canDelComment = c.authorId === currentUser.id || isMyPost;
+        return `
+          <div class="insta-comment-row">
+            <div class="insta-comment-body">
+              <strong>${escapeHTML(cUser.nickname)}</strong>
+              <span>${escapeHTML(c.text)}</span>
+            </div>
+            <div class="insta-comment-meta">
+              <small>${escapeHTML(c.createdAt || '')}</small>
+              ${canDelComment ? `<button type="button" class="insta-del-comment-btn" data-cid="${c.id}" title="댓글 삭제">✕</button>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      card.innerHTML = `
+        <div class="insta-post-header">
+          <div class="insta-author-info">
+            <img src="${author.avatar || createDefaultAvatar(author.nickname)}" alt="${escapeHTML(author.nickname)}" class="insta-author-avatar" />
+            <div>
+              <strong>${escapeHTML(author.nickname)}</strong>
+              <span>@${escapeHTML(author.id)} · ${escapeHTML(post.createdAt)}</span>
+            </div>
+          </div>
+          ${isMyPost ? `<button type="button" class="insta-delete-post-btn">🗑️ 삭제</button>` : ''}
+        </div>
+
+        <div class="insta-post-img-wrap">
+          <img src="${post.image}" alt="${escapeHTML(post.liquorName)}" class="insta-post-img" />
+        </div>
+
+        <div class="insta-post-actions">
+          <button type="button" class="insta-like-btn ${isLiked ? 'liked' : ''}">
+            ${isLiked ? '❤️' : '🤍'} 좋아요 <b>${likes.length}</b>
+          </button>
+          <span class="insta-comment-count">💬 댓글 <b>${comments.length}</b>개</span>
+        </div>
+
+        ${likes.length > 0 ? `<div class="insta-liked-by">❤️ <b>${escapeHTML(likedNames)}</b>${likes.length > 3 ? ` 외 ${likes.length - 3}명` : '님'}이 좋아합니다</div>` : ''}
+
+        <div class="insta-post-content">
+          <span class="insta-drink-badge">🍷 오늘의 술: ${escapeHTML(post.liquorName)}</span>
+          <p><strong>${escapeHTML(author.nickname)}</strong> ${escapeHTML(post.caption)}</p>
+        </div>
+
+        <div class="insta-comments-section">
+          ${commentsHtml}
+          <form class="insta-comment-form">
+            <input type="text" placeholder="댓글 달기..." required />
+            <button type="submit">게시</button>
+          </form>
+        </div>
+      `;
+
+      // 좋아요 토글
+      card.querySelector('.insta-like-btn').addEventListener('click', () => {
+        const latestPosts = getPostsDB();
+        const target = latestPosts.find(p => p.id === post.id);
+        if (!target) return;
+        target.likes = Array.isArray(target.likes) ? target.likes : [];
+
+        const idx = target.likes.indexOf(currentUser.id);
+        if (idx >= 0) target.likes.splice(idx, 1);
+        else target.likes.push(currentUser.id);
+
+        savePostsDB(latestPosts);
+        renderFeedView();
+      });
+
+      // 댓글 등록
+      card.querySelector('.insta-comment-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const input = e.target.querySelector('input');
+        const text = input.value.trim();
+        if (!text) return;
+
+        const latestPosts = getPostsDB();
+        const target = latestPosts.find(p => p.id === post.id);
+        if (!target) return;
+        target.comments = Array.isArray(target.comments) ? target.comments : [];
+
+        target.comments.push({
+          id: 'cmt_' + Date.now(),
+          authorId: currentUser.id,
+          text,
+          createdAt: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
+        });
+
+        savePostsDB(latestPosts);
+        renderFeedView();
+      });
+
+      // 댓글 삭제
+      card.querySelectorAll('.insta-del-comment-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const cid = btn.dataset.cid;
+          const latestPosts = getPostsDB();
+          const target = latestPosts.find(p => p.id === post.id);
+          if (!target) return;
+          target.comments = (target.comments || []).filter(c => c.id !== cid);
+          savePostsDB(latestPosts);
+          renderFeedView();
+        });
+      });
+
+      // 본인 게시물 삭제
+      const delPostBtn = card.querySelector('.insta-delete-post-btn');
+      if (delPostBtn) {
+        delPostBtn.addEventListener('click', () => {
+          const updated = getPostsDB().filter(p => p.id !== post.id);
+          savePostsDB(updated);
+          renderFeedView();
+          showToast('🗑️ 게시물이 삭제되었습니다.');
+        });
+      }
+
+      feedPostsListEl.appendChild(card);
+    });
+  }
 
   // ==========================================
   // [탭 4] AI 바텐더 + 사이트 외 술 추천 & 바로 담기
