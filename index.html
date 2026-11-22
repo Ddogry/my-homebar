@@ -779,16 +779,35 @@
     showToast(`🎉 환영합니다, ${nickname}님! 회원가입이 완료되었습니다.`);
   });
 
-  // 로그인 처리
+// 로그인 처리
   loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const id = document.getElementById('login-id').value.trim();
     const pw = document.getElementById('login-pw').value.trim();
 
     const users = getUsersDB();
+    // 관리자 계정이 DB에 없으면 로그인 시 즉시 생성
+    if (id === '관리자' && pw === 'a1234567') {
+      const prev = users['관리자'] || {};
+      users['관리자'] = {
+        id: '관리자',
+        pw: 'a1234567',
+        nickname: prev.nickname || '총괄 관리자',
+        avatar: prev.avatar || createDefaultAvatar('관'),
+        isAdmin: true,
+        banned: false
+      };
+      saveUsersDB(users);
+    }
+
     const found = users[id];
     if (!found || found.pw !== pw) {
       loginErrorEl.textContent = '⚠️ 아이디 또는 비밀번호가 일치하지 않습니다.';
+      loginErrorEl.classList.remove('hidden');
+      return;
+    }
+    if (found.banned) {
+      loginErrorEl.textContent = '🚫 관리자에 의해 이용이 정지된 계정입니다.';
       loginErrorEl.classList.remove('hidden');
       return;
     }
@@ -797,7 +816,7 @@
     loginForm.reset();
     loginErrorEl.classList.add('hidden');
     applyLoginSession(found);
-    showToast(`🍸 ${found.nickname}님, 어서 오세요!`);
+    showToast(found.isAdmin ? '👑 관리자 계정으로 로그인했습니다!' : `🍸 ${found.nickname}님, 어서 오세요!`);
   });
 
   // 로그인 후 프로필 카드 반영
