@@ -1864,3 +1864,276 @@ body.dark-mode .insta-liked-by,
 body.dark-mode .friend-req-user span {
   color: #aaa;
 }
+
+/* ==========================================
+   관리자 계정 & 관리자 센터 스타일
+   ========================================== */
+.admin-role-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background-color: #ef4444;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.admin-role-badge.hidden {
+  display: none;
+}
+
+.global-notice-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 16px;
+  margin-bottom: 18px;
+  border-radius: 12px;
+  background-color: #fef3c7;
+  border: 1px solid #f59e0b;
+  color: #92400e;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.global-notice-banner.hidden {
+  display: none;
+}
+
+.notice-pill {
+  padding: 3px 8px;
+  border-radius: 8px;
+  background-color: #f59e0b;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.admin-liquor-panel {
+  background-color: #fef2f2;
+  border: 2px solid #ef4444;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.admin-liquor-panel.hidden {
+  display: none;
+}
+
+.admin-panel-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+  color: #b91c1c;
+}
+
+.admin-panel-title span {
+  font-size: 12px;
+  color: #7f1d1d;
+}
+
+.admin-add-liquor-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-add-liquor-form select,
+.admin-add-liquor-form input {
+  padding: 9px 12px;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  font-size: 13px;
+  background-color: #ffffff;
+}
+
+.admin-add-liquor-form input[id="admin-liq-desc"] {
+  flex: 1;
+  min-width: 180px;
+}
+
+.admin-img-upload-btn {
+  padding: 9px 12px;
+  border: 1px dashed #ef4444;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #dc2626;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-add-btn {
+  padding: 9px 16px;
+  border: none;
+  border-radius: 8px;
+  background-color: #ef4444;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-add-btn:hover {
+  background-color: #dc2626;
+}
+
+.admin-del-liquor-btn {
+  margin-top: 8px;
+  padding: 4px 10px;
+  border: 1px solid #fca5a5;
+  border-radius: 6px;
+  background-color: #fef2f2;
+  color: #dc2626;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-del-liquor-btn:hover {
+  background-color: #ef4444;
+  color: #ffffff;
+}
+
+.admin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.admin-stat-card {
+  background-color: #f8f9fa;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-stat-card span {
+  font-size: 13px;
+  color: #666;
+}
+
+.admin-stat-card strong {
+  font-size: 22px;
+  color: #ff9800;
+}
+
+.admin-section-card {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 18px;
+}
+
+.admin-section-card h3 {
+  margin: 0 0 8px;
+}
+
+.admin-users-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.admin-user-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+}
+
+.admin-user-row.banned {
+  background-color: #fef2f2;
+  border-color: #fca5a5;
+}
+
+.admin-user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-user-info div {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-user-info span {
+  font-size: 12px;
+  color: #777;
+}
+
+.banned-pill {
+  padding: 2px 6px;
+  border-radius: 6px;
+  background-color: #dc2626;
+  color: #fff;
+  font-size: 11px;
+}
+
+.admin-user-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.admin-ban-btn {
+  padding: 6px 12px;
+  border: 1px solid #f59e0b;
+  border-radius: 8px;
+  background-color: #fffbeb;
+  color: #b45309;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-del-user-btn {
+  padding: 6px 12px;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  background-color: #fef2f2;
+  color: #dc2626;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+body.dark-mode .admin-liquor-panel {
+  background-color: #2b1818;
+  border-color: #ef4444;
+}
+
+body.dark-mode .admin-panel-title,
+body.dark-mode .admin-panel-title span {
+  color: #fca5a5;
+}
+
+body.dark-mode .admin-add-liquor-form select,
+body.dark-mode .admin-add-liquor-form input,
+body.dark-mode .admin-img-upload-btn {
+  background-color: #2a2a2a;
+  border-color: #555;
+  color: #ffffff;
+}
+
+body.dark-mode .admin-stat-card,
+body.dark-mode .admin-section-card,
+body.dark-mode .admin-user-row {
+  background-color: #1e1e1e;
+  border-color: #444;
+}

@@ -54,6 +54,7 @@
       <button type="button" id="profile-trigger-btn" class="profile-trigger-btn" title="내 계정 정보">
         <img id="header-avatar-img" src="" alt="프로필" class="header-avatar" />
         <span id="header-nickname-text" class="header-nickname">사용자</span>
+        <span id="admin-header-badge" class="admin-role-badge hidden">👑 관리자</span>
       </button>
 
       <!-- 클릭 시 열리는 프로필 카드 -->
@@ -94,7 +95,17 @@
     <button class="nav-tab-btn" id="tab-ai" data-target="view-ai">
       🤖 AI 바텐더
     </button>
+    <button class="nav-tab-btn hidden" id="tab-admin" data-target="view-admin">
+      🛡️ 관리자 센터
+    </button>
   </div>
+
+  <!-- ▼ 전체 공지사항 배너 추가 -->
+  <div id="global-notice-banner" class="global-notice-banner hidden">
+    <span class="notice-pill">📢 공지</span>
+    <span id="global-notice-text"></span>
+  </div>
+  
 
   <!-- [탭 1] 술 고르기 & 임시 바구니 화면 -->
   <div id="view-browse" class="tab-view">
@@ -104,6 +115,30 @@
     <div class="cabinet-layout">
       <!-- 왼쪽: 술 카테고리 + 세부 20종 목록 -->
       <div class="cabinet-main">
+        <!-- ▼ [관리자 전용] 술 카탈로그 추가 패널 -->
+        <div id="admin-liquor-panel" class="admin-liquor-panel hidden">
+          <div class="admin-panel-title">
+            <strong>🛡️ [관리자] 술 고르기 목록에 새 술 추가</strong>
+            <span>추가된 술은 모든 회원의 '술 고르기' 탭에 즉시 반영됩니다.</span>
+          </div>
+          <form id="admin-add-liquor-form" class="admin-add-liquor-form">
+            <select id="admin-liq-category" required>
+              <option value="vodka">보드카</option>
+              <option value="rum">럼</option>
+              <option value="gin">진</option>
+              <option value="tequila">데킬라</option>
+              <option value="whiskey" selected>위스키</option>
+              <option value="brandy">브랜디</option>
+              <option value="liqueur">리큐르</option>
+            </select>
+            <input type="text" id="admin-liq-name" placeholder="술 이름 (예: 글렌드로나크 12년)" required />
+            <input type="text" id="admin-liq-abv" placeholder="도수 (예: 43%)" required />
+            <input type="text" id="admin-liq-desc" placeholder="한줄 설명 (예: 진한 셰리 오크 풍미)" required />
+            <label for="admin-liq-img-input" class="admin-img-upload-btn" id="admin-liq-img-label">📷 사진 선택 (선택)</label>
+            <input type="file" id="admin-liq-img-input" accept="image/*" hidden />
+            <button type="submit" class="admin-add-btn">+ 술 목록에 추가</button>
+          </form>
+        </div>
         <div class="ingredient-grid" id="category-grid">
           <div class="ingredient-card" data-category="vodka">
             <img src="my vodka.png" alt="보드카" class="category-img" />
@@ -318,6 +353,62 @@
       <input type="text" id="ai-user-input" placeholder="예: 내 술장으로 칵테일 추천해줘 / 사이트에 없는 전통주나 사케 추천해줘" autocomplete="off" required />
       <button type="submit" class="ai-send-btn">전송 ➤</button>
     </form>
+  </div>
+  <!-- ▼ [탭 5] 관리자 센터 화면 추가 -->
+  <div id="view-admin" class="tab-view hidden">
+    <div class="my-cabinet-header">
+      <div>
+        <h2>🛡️ 관리자 통합 관리 센터</h2>
+        <p class="guide-text">사이트 공지사항, 술 카탈로그, 회원 및 게시글을 한곳에서 관리합니다.</p>
+      </div>
+    </div>
+
+    <div class="admin-stats-grid">
+      <div class="admin-stat-card">
+        <span>👥 전체 가입 회원</span>
+        <strong id="admin-stat-users">0명</strong>
+      </div>
+      <div class="admin-stat-card">
+        <span>🍾 등록된 술 종류</span>
+        <strong id="admin-stat-liquors">140종</strong>
+      </div>
+      <div class="admin-stat-card">
+        <span>📸 전체 게시글</span>
+        <strong id="admin-stat-posts">0개</strong>
+      </div>
+      <div class="admin-stat-card">
+        <span>💬 전체 댓글</span>
+        <strong id="admin-stat-comments">0개</strong>
+      </div>
+    </div>
+
+    <div class="admin-section-card">
+      <h3>📢 사이트 상단 공지사항 관리</h3>
+      <p class="guide-text">공지를 등록하면 로그인한 모든 회원의 화면 상단에 배너가 표시됩니다.</p>
+      <form id="admin-notice-form" class="friend-add-form">
+        <input type="text" id="admin-notice-input" placeholder="공지사항 내용을 입력하세요 (예: 🎉 이번 주말 홈바 인증 이벤트 진행 중!)" />
+        <button type="submit" class="go-browse-btn">공지 등록</button>
+        <button type="button" id="admin-notice-clear-btn" class="remove-cabinet-btn" style="margin-top:0;">공지 내리기</button>
+      </form>
+    </div>
+
+    <div class="admin-section-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div>
+          <h3 style="margin:0 0 4px;">🍾 술 카탈로그 관리</h3>
+          <p class="guide-text" style="margin:0;">'술 고르기 & 담기' 탭에서 직접 술을 추가하거나 각 카드의 삭제 버튼으로 제거할 수 있습니다.</p>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button type="button" id="admin-go-catalog-btn" class="go-browse-btn">술 추가/삭제하러 가기 ➔</button>
+          <button type="button" id="admin-reset-catalog-btn" class="clear-cart-btn">기본 목록 복구</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-section-card">
+      <h3>👥 가입 회원 관리</h3>
+      <div id="admin-users-list" class="admin-users-list"></div>
+    </div>
   </div>
 </div>
 
